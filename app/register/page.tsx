@@ -7,78 +7,61 @@ export default function RegisterPage() {
   const router = useRouter()
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
-  const [nombre, setNombre] = useState("")
 
-  const handleRegister = async (e: React.FormEvent) => {
-    e.preventDefault()
-
-    // 1️⃣ Registrar en Supabase Auth
-    const { data, error } = await supabase.auth.signUp({
-      email,
-      password,
-    })
-
+  const handleRegister = async () => {
+    const { error } = await supabase.auth.signUp({ email, password })
     if (error) {
       alert(error.message)
-      return
-    }
-
-    // 2️⃣ Guardar en la tabla "usuarios"
-    const { error: dbError } = await supabase.from("usuarios").insert([
-      {
-        email,
-        nombre,
-      },
-    ])
-
-    if (dbError) {
-      alert("Error al guardar usuario en la BD: " + dbError.message)
     } else {
       alert("Registro exitoso 🎉 Revisa tu correo para confirmar.")
-      router.push("/") // Redirige al home
+      router.push("/login") // después de registrarte, te envía al login
     }
   }
 
   return (
-    <div className="flex items-center justify-center h-screen bg-gradient-to-b from-yellow-100 to-yellow-500">
-      <div className="bg-white p-8 rounded-2xl shadow-xl w-96">
-        <h1 className="text-2xl font-bold mb-4 text-center">📝 Registro</h1>
+    <div className="login-background">
+      <div className="login-card w-96 text-center">
+        {/* 📝 Título con estilo degradado */}
+        <h1 className="login-title">
+          <span>📝 Registro</span>
+        </h1>
 
-        <form onSubmit={handleRegister}>
-          <input
-            type="text"
-            placeholder="Nombre"
-            className="w-full p-3 border rounded mb-3"
-            value={nombre}
-            onChange={(e) => setNombre(e.target.value)}
-            required
-          />
+        {/* 📧 Campo de correo */}
+        <input
+          type="email"
+          placeholder="Correo"
+          className="login-input w-full mb-3"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+        />
 
-          <input
-            type="email"
-            placeholder="Correo"
-            className="w-full p-3 border rounded mb-3"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-          />
+        {/* 🔑 Campo de contraseña */}
+        <input
+          type="password"
+          placeholder="Contraseña"
+          className="login-input w-full mb-4"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+        />
 
-          <input
-            type="password"
-            placeholder="Contraseña"
-            className="w-full p-3 border rounded mb-3"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-          />
+        {/* ✅ Botón de registro */}
+        <button
+          onClick={handleRegister}
+          className="btn w-full mb-3"
+        >
+          Registrarse
+        </button>
 
-          <button
-            type="submit"
-            className="w-full bg-green-500 text-white py-3 rounded-xl hover:bg-green-600 transition"
+        {/* 🔙 Volver a inicio de sesión */}
+        <p className="login-text text-sm">
+          ¿Ya tienes cuenta?{" "}
+          <a
+            onClick={() => router.push("/login")}
+            className="cursor-pointer"
           >
-            Registrarse
-          </button>
-        </form>
+            Inicia sesión
+          </a>
+        </p>
       </div>
     </div>
   )

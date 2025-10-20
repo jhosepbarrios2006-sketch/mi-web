@@ -1,85 +1,78 @@
 "use client"
 import { useState } from "react"
 import { supabase } from "@/lib/supabaseClient"
-import { useRouter } from "next/navigation"   // 👈 Importar router
+import { useRouter } from "next/navigation"
 
 export default function LoginPage() {
-  const router = useRouter() // 👈 Inicializar router
+  const router = useRouter()
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
 
   const handleLogin = async () => {
-    const { error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    })
+    const { error } = await supabase.auth.signInWithPassword({ email, password })
     if (error) {
       alert(error.message)
     } else {
       alert("Login exitoso 🎉")
-      router.push("/")  // 👈 Redirigir al home
-    }
-  }
-
-  const handleRegister = async () => {
-    const { error } = await supabase.auth.signUp({
-      email,
-      password,
-    })
-    if (error) {
-      alert(error.message)
-    } else {
-      alert("Registro exitoso 🎉 Revisa tu correo para confirmar.")
-      router.push("/")  // 👈 Redirigir al home después de registro
+      router.push("/")
     }
   }
 
   const handleGuest = () => {
     alert("Entraste como invitado 🚀")
-    router.push("/")  // 👈 Invitado también va al home
+    router.push("/")
   }
 
   return (
-    <div className="flex items-center justify-center h-screen bg-gradient-to-b from-black to-yellow-700">
-      <div className="bg-white p-8 rounded-2xl shadow-xl w-96 text-center">
-        <h1 className="text-2xl font-bold mb-4">🔒 Ingresar</h1>
+    <div className="login-background">
+      <div className="login-card w-96 text-center">
+        {/* 🔐 Título */}
+        <h1 className="hero-title mb-6">🔒 Ingresar</h1>
 
+        {/* 📧 Campo de correo */}
         <input
           type="email"
-          placeholder="Correo"
-          className="w-full p-3 border rounded mb-3"
+          placeholder="Correo electrónico"
+          className="login-input w-full mb-3 p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#b08968]"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
         />
 
+        {/* 🔑 Campo de contraseña */}
         <input
           type="password"
           placeholder="Contraseña"
-          className="w-full p-3 border rounded mb-3"
+          className="login-input w-full mb-4 p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#b08968]"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
         />
 
+        {/* 🧡 Botón principal */}
         <button
           onClick={handleLogin}
-          className="w-full bg-blue-500 text-white py-3 rounded-xl hover:bg-blue-600 transition mb-2"
+          className="btn w-full mb-3"
         >
           Iniciar Sesión
         </button>
 
-        <button
-          onClick={handleRegister}
-          className="w-full bg-green-500 text-white py-3 rounded-xl hover:bg-green-600 transition mb-2"
-        >
-          Registrarse
-        </button>
-
+        {/* 🚀 Invitado */}
         <button
           onClick={handleGuest}
-          className="w-full bg-gray-300 text-black py-3 rounded-xl hover:bg-gray-400 transition"
+          className="btn w-full bg-[#cbb39a] hover:bg-[#b08968]"
         >
           Continuar como Invitado
         </button>
+
+        {/* 🔗 Registro */}
+        <p className="login-text text-sm mt-4">
+          ¿No tienes cuenta?{" "}
+          <a
+            onClick={() => router.push("/register")}
+            className="cursor-pointer text-[#b08968] hover:underline"
+          >
+            Regístrate aquí
+          </a>
+        </p>
       </div>
     </div>
   )
