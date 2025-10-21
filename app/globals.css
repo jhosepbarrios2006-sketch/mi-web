@@ -4,11 +4,11 @@
 /* 🎨 Paleta y tipografía base */
 :root {
   --background: linear-gradient(to bottom right, #fdfaf6, #f8ecdc, #f7d7b5);
-  --foreground: #e6e4e3;
+  --foreground: #3e2b20;
   --font-title: "Playfair Display", serif;
   --font-sans: "Poppins", sans-serif;
   --color-accent: #b08968;
-  --color-highlight: #fd5939; /* toque cálido para hover o detalles */
+  --color-highlight: #fd5939;
   --color-card-bg: #ffffff;
   --color-shadow: rgba(0, 0, 0, 0.1);
 }
@@ -47,7 +47,7 @@ h1, h2, h3, h4 {
 p {
   font-family: var(--font-sans);
   line-height: 1.7;
-  color: #3e2b20;
+  color: var(--foreground);
 }
 
 /* 🌿 Scrollbar personalizada */
@@ -71,7 +71,7 @@ p {
   box-shadow: 0 6px 16px rgba(176, 137, 104, 0.25);
 }
 
-/* 🧡 Botones */
+/* 🧡 Botones generales */
 button, .btn {
   font-family: var(--font-sans);
   font-weight: 600;
@@ -91,9 +91,18 @@ button:hover, .btn:hover {
 }
 
 /* 🍮 Navegación principal (header) */
+header {
+  background: linear-gradient(to right, #fffaf0, #f7e6ca, #fbd3b0);
+  box-shadow: 0 2px 10px rgba(100, 60, 20, 0.15);
+  backdrop-filter: blur(5px);
+  transition: all 0.3s ease;
+}
+
+/* Botones del menú de navegación */
 .nav-button {
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 8px;
   background: rgba(255, 255, 255, 0.35);
   color: var(--foreground);
@@ -111,14 +120,6 @@ button:hover, .btn:hover {
   box-shadow: 0 4px 12px rgba(253, 89, 57, 0.3);
 }
 
-/* 🧭 Header */
-header {
-  background: linear-gradient(to right, #fffaf0, #f7e6ca, #fbd3b0);
-  box-shadow: 0 2px 10px rgba(100, 60, 20, 0.15);
-  backdrop-filter: blur(5px);
-  transition: all 0.3s ease;
-}
-
 /* 🌅 Footer */
 footer {
   font-family: var(--font-sans);
@@ -127,6 +128,7 @@ footer {
   padding: 1rem;
   background: linear-gradient(to right, #fdfaf6, #f7e6ca);
   border-top: 1px solid rgba(176, 137, 104, 0.2);
+  box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.05);
 }
 
 /* 🪄 Fondo y centrado del login */
@@ -145,10 +147,11 @@ footer {
   box-shadow: 0 6px 16px var(--color-shadow);
   border-radius: 1rem;
   padding: 2rem;
+  width: 100%;
+  max-width: 400px;
   backdrop-filter: blur(8px);
   transition: all 0.3s ease;
 }
-
 .login-card:hover {
   transform: scale(1.02);
   box-shadow: 0 8px 20px rgba(176, 137, 104, 0.25);
@@ -160,16 +163,37 @@ footer {
   background: #fffdf9;
   border: 1px solid rgba(176, 137, 104, 0.3);
   color: #3e2b20;
+  width: 100%;
+  padding: 0.7rem 1rem;
+  border-radius: 0.5rem;
   transition: all 0.3s ease;
 }
-
 .login-input:focus {
   border-color: var(--color-accent);
   box-shadow: 0 0 6px rgba(176, 137, 104, 0.3);
+  outline: none;
 }
 
-/* 📄 Texto inferior */
+/* 📄 Texto inferior (login o footer) */
 .login-text {
   color: #3e2b20;
+  font-size: 0.9rem;
+  text-align: center;
+  margin-top: 1rem;
 }
 
+/* 🌈 Animaciones suaves */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.fade-in {
+  animation: fadeIn 0.6s ease-in-out;
+}
