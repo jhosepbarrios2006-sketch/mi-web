@@ -1,7 +1,7 @@
 "use client";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import HistorySection from "../components/HistorySection";
 import ReviewsSection from "../components/ReviewsSection";
 import MapSection from "../components/MapSection";
@@ -13,7 +13,7 @@ export default function HomePage() {
   const [showCreateCoupon, setShowCreateCoupon] = useState(false);
 
   return (
-    <main className="flex flex-col items-center min-h-screen bg-[var(--background)] text-[var(--foreground)] font-[var(--font-sans)] relative">
+    <main className="flex flex-col items-center min-h-screen bg-[var(--background)] text-[var(--foreground)] font-[var(--font-sans)]">
 
       {/* 🌇 HERO */}
       <motion.section
@@ -160,41 +160,24 @@ export default function HomePage() {
         className="w-full flex justify-center mt-12 mb-12"
       >
         <button
-          onClick={() => setShowCreateCoupon(true)}
+          onClick={() => setShowCreateCoupon(!showCreateCoupon)}
           className="bg-green-600 text-white px-8 py-4 rounded-xl hover:bg-green-700 transition-colors text-lg"
         >
-          Generar Cupón
+          {showCreateCoupon ? "Cerrar Generador de Cupones" : "Generar Cupón"}
         </button>
       </motion.div>
 
-      {/* 🎟️ MODAL DEL GENERADOR DE CUPONES */}
-      <AnimatePresence>
-        {showCreateCoupon && (
-          <motion.div
-            key="coupon-modal"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
-          >
-            <motion.div
-              initial={{ scale: 0.8, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.8, opacity: 0 }}
-              transition={{ duration: 0.3 }}
-              className="bg-white rounded-2xl p-6 max-w-md w-full relative"
-            >
-              <button
-                onClick={() => setShowCreateCoupon(false)}
-                className="absolute top-3 right-3 text-gray-500 hover:text-gray-800 text-xl font-bold"
-              >
-                ✕
-              </button>
-              <CreateCoupon />
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      {/* 🎟️ GENERADOR DE CUPONES */}
+      {showCreateCoupon && (
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          className="w-full max-w-xl mb-12 px-4"
+        >
+          <CreateCoupon />
+        </motion.div>
+      )}
 
       {/* 🧡 FOOTER */}
       <footer className="w-full py-6 text-center bg-[#4b2e16] text-white mt-auto rounded-t-3xl">
