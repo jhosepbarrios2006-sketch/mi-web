@@ -1,199 +1,269 @@
-@import url("https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Poppins:wght@300;400;600&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;900&display=swap");
 @import "tailwindcss";
 
-/* 🎨 Paleta y tipografía base */
+/* 🎨 Paleta moderna y tipografía base */
 :root {
-  --background: linear-gradient(to bottom right, #fdfaf6, #f8ecdc, #f7d7b5);
-  --foreground: #3e2b20;
-  --font-title: "Playfair Display", serif;
-  --font-sans: "Poppins", sans-serif;
-  --color-accent: #b08968;
-  --color-highlight: #fd5939;
-  --color-card-bg: #ffffff;
-  --color-shadow: rgba(0, 0, 0, 0.1);
+  --color-bg: #0e0d0d;
+  --color-text: #e0dbdb;
+  --color-accent: #f5c518; /* Dorado */
+  --color-dark: #000000;
+  --color-overlay: rgba(0, 0, 0, 0.6);
+  --font-main: "Poppins", sans-serif;
 }
 
-/* 🧱 Estilo general del cuerpo */
+/* 🧱 Cuerpo general */
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: var(--font-sans);
-  min-height: 100vh;
+  font-family: var(--font-main);
+  background-color: var(--color-bg);
+  color: var(--color-text);
   margin: 0;
-  transition: background 0.5s ease, color 0.5s ease;
+  padding: 0;
+  min-height: 100vh;
   scroll-behavior: smooth;
 }
 
-/* ✨ Tipografía personalizada */
+/* ✨ Titulares */
 h1, h2, h3, h4 {
-  font-family: var(--font-title);
-  color: var(--foreground);
+  font-family: var(--font-main);
+  font-weight: 800;
+  letter-spacing: 1px;
+  color: var(--color-text);
 }
 
-/* Hero principal — título sobre imagen */
+/* 🔝 Navbar moderna */
+header, .navbar {
+  background: rgba(0, 0, 0, 0.85);
+  backdrop-filter: blur(12px);
+  color: #fff;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  z-index: 50;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 2rem;
+}
+
+.navbar a {
+  color: #fff;
+  font-weight: 600;
+  margin: 0 1rem;
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+.navbar a:hover {
+  color: var(--color-accent);
+}
+
+/* ☕ Logo */
+.logo {
+  font-weight: 900;
+  font-size: 1.3rem;
+  letter-spacing: 1.2px;
+  color: var(--color-accent);
+}
+
+/* 🔘 Botón cerrar sesión */
+.logout-btn, .auth-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 20px;
+  border-radius: 9999px;
+  background: var(--color-accent);
+  color: #000;
+  font-weight: 700;
+  box-shadow: 0 4px 10px rgba(245, 197, 24, 0.3);
+  transition: all 0.3s ease;
+}
+.logout-btn:hover, .auth-button:hover {
+  background: #fde047;
+  transform: translateY(-2px);
+}
+
+/* 🌆 Hero principal */
+.hero {
+  position: relative;
+  min-height: 100vh;
+  background: url("https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=1600&q=80")
+    center/cover no-repeat;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+}
+.hero::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: var(--color-overlay);
+}
+.hero-content {
+  position: relative;
+  z-index: 10;
+  max-width: 800px;
+  padding: 2rem;
+}
 .hero-title {
   font-size: 3rem;
-  font-weight: 700;
-  text-align: center;
-  color: transparent;
-  background: linear-gradient(to right, #5e3a1d, #b76e2a, #fd5939);
-  -webkit-background-clip: text;
-  background-clip: text;
-  text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.3);
-  letter-spacing: 1px;
-}
-
-/* Texto general */
-p {
-  font-family: var(--font-sans);
-  line-height: 1.7;
-  color: var(--foreground);
-}
-
-/* 🌿 Scrollbar personalizada */
-::-webkit-scrollbar {
-  width: 10px;
-}
-::-webkit-scrollbar-thumb {
-  background-color: rgba(120, 80, 40, 0.5);
-  border-radius: 10px;
-}
-
-/* ☕ Tarjetas con efecto hover */
-.card {
-  background-color: var(--color-card-bg);
-  box-shadow: 0 4px 10px var(--color-shadow);
+  font-weight: 900;
+  text-transform: uppercase;
+  background: white;
+  color: #000;
+  padding: 1rem 1.5rem;
   border-radius: 1rem;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  line-height: 1.2;
+  display: inline-block;
+}
+.hero-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 1.5rem;
+  margin-top: 2rem;
+}
+
+/* 🟡 Botones del hero */
+.hero-btn {
+  font-family: var(--font-main);
+  font-weight: 600;
+  border-radius: 9999px;
+  padding: 0.8rem 2rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+.hero-btn-black {
+  background: #000;
+  color: #fff;
+}
+.hero-btn-black:hover {
+  background: var(--color-accent);
+  color: #000;
+}
+.hero-btn-gold {
+  background: var(--color-accent);
+  color: #000;
+}
+.hero-btn-gold:hover {
+  background: #fff;
+  color: #000;
+}
+
+/* 🧋 Sección general */
+.section {
+  padding: 6rem 2rem;
+  background: var(--color-bg);
+  color: var(--color-text);
+  text-align: center;
+}
+.section h2 {
+  font-size: 2.5rem;
+  margin-bottom: 1rem;
+  font-weight: 800;
+}
+.section p {
+  max-width: 700px;
+  margin: 0 auto 4rem;
+  line-height: 1.6;
+  color: #ccc;
+}
+
+/* 📦 Tarjetas de cafeterías */
+.card {
+  background: #1a1a1a;
+  border-radius: 1rem;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(245, 197, 24, 0.3);
+  transition: all 0.3s ease;
 }
 .card:hover {
   transform: scale(1.03);
-  box-shadow: 0 6px 16px rgba(176, 137, 104, 0.25);
+  box-shadow: 0 6px 18px rgba(245, 197, 24, 0.5);
+}
+.card img {
+  width: 100%;
+  height: 220px;
+  object-fit: cover;
+}
+.card-content {
+  padding: 1.5rem;
+  text-align: left;
+}
+.card-content h3 {
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+}
+.card-content p {
+  color: #aaa;
+  font-size: 0.95rem;
 }
 
-/* 🧡 Botones generales */
-button, .btn {
-  font-family: var(--font-sans);
-  font-weight: 600;
-  background: var(--color-accent);
-  color: #fff;
-  padding: 0.6rem 1.2rem;
-  border: none;
-  border-radius: 0.75rem;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  box-shadow: 0 4px 10px rgba(176, 137, 104, 0.25);
-}
-button:hover, .btn:hover {
-  background: var(--color-highlight);
-  transform: translateY(-2px);
-  box-shadow: 0 6px 14px rgba(253, 89, 57, 0.3);
-}
-
-/* 🍮 Navegación principal (header) */
-header {
-  background: linear-gradient(to right, #fffaf0, #f7e6ca, #fbd3b0);
-  box-shadow: 0 2px 10px rgba(100, 60, 20, 0.15);
-  backdrop-filter: blur(5px);
-  transition: all 0.3s ease;
-}
-
-/* Botones del menú de navegación */
-.nav-button {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  background: rgba(255, 255, 255, 0.35);
-  color: var(--foreground);
-  padding: 10px 18px;
-  border-radius: 12px;
-  font-weight: 600;
-  text-decoration: none;
-  transition: all 0.3s ease;
-  backdrop-filter: blur(6px);
-}
-.nav-button:hover {
-  background: var(--color-highlight);
-  color: #fff;
-  transform: scale(1.05);
-  box-shadow: 0 4px 12px rgba(253, 89, 57, 0.3);
-}
-
-/* 🌅 Footer */
-footer {
-  font-family: var(--font-sans);
-  text-align: center;
-  color: var(--foreground);
-  padding: 1rem;
-  background: linear-gradient(to right, #fdfaf6, #f7e6ca);
-  border-top: 1px solid rgba(176, 137, 104, 0.2);
-  box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.05);
-}
-
-/* 🪄 Fondo y centrado del login */
-.login-background {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 100vh;
-  background: var(--background);
-  padding: 1rem;
-}
-
-/* 🧩 Tarjeta del login */
-.login-card {
-  background: var(--color-card-bg);
-  box-shadow: 0 6px 16px var(--color-shadow);
-  border-radius: 1rem;
+/* 🎁 Tarjetas de cupones / beneficios */
+.cupon-card {
+  background: #1a1a1a;
+  border: 2px solid var(--color-accent);
+  border-radius: 1.2rem;
+  box-shadow: 0 0 15px rgba(245, 197, 24, 0.3);
   padding: 2rem;
-  width: 100%;
-  max-width: 400px;
-  backdrop-filter: blur(8px);
-  transition: all 0.3s ease;
+  transition: transform 0.3s ease;
 }
-.login-card:hover {
-  transform: scale(1.02);
-  box-shadow: 0 8px 20px rgba(176, 137, 104, 0.25);
+.cupon-card:hover {
+  transform: translateY(-6px);
 }
-
-/* ✍️ Campos de entrada */
-.login-input {
-  font-family: var(--font-sans);
-  background: #fffdf9;
-  border: 1px solid rgba(176, 137, 104, 0.3);
-  color: #3e2b20;
-  width: 100%;
-  padding: 0.7rem 1rem;
-  border-radius: 0.5rem;
-  transition: all 0.3s ease;
-}
-.login-input:focus {
-  border-color: var(--color-accent);
-  box-shadow: 0 0 6px rgba(176, 137, 104, 0.3);
-  outline: none;
-}
-
-/* 📄 Texto inferior (login o footer) */
-.login-text {
-  color: #3e2b20;
-  font-size: 0.9rem;
-  text-align: center;
+.cupon-card img {
+  border-radius: 1rem;
+  border: 1px solid var(--color-accent);
   margin-top: 1rem;
 }
 
-/* 🌈 Animaciones suaves */
+/* 📜 Sección Carta */
+.carta-container {
+  background: linear-gradient(to bottom right, #1a1a1a, #000);
+  padding: 5rem 2rem;
+  color: var(--color-text);
+}
+.carta-item {
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+  padding: 1rem 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.carta-item h3 {
+  color: var(--color-accent);
+}
+.carta-item span {
+  font-weight: 600;
+  color: #fff;
+}
+
+/* 🌙 Footer moderno */
+footer {
+  background: #111;
+  text-align: center;
+  padding: 2rem;
+  color: #bbb;
+  font-size: 0.9rem;
+  border-top: 1px solid rgba(255,255,255,0.1);
+}
+
+/* 🌈 Animación suave */
 @keyframes fadeIn {
   from {
     opacity: 0;
-    transform: translateY(10px);
+    transform: translateY(15px);
   }
   to {
     opacity: 1;
     transform: translateY(0);
   }
 }
-
 .fade-in {
-  animation: fadeIn 0.6s ease-in-out;
+  animation: fadeIn 0.8s ease-in-out;
+}
+
+/* 🧭 Ajuste general para secciones */
+main {
+  padding-top: 5rem;
 }
