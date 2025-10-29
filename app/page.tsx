@@ -1,16 +1,13 @@
 "use client";
-import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import HistorySection from "../components/HistorySection";
 import ReviewsSection from "../components/ReviewsSection";
 import MapSection from "../components/MapSection";
 import PromotionsSection from "../components/PromotionsSection";
-import CreateCoupon from "../components/CreateCoupon";
 
 export default function HomePage() {
   const router = useRouter();
-  const [showCreateCoupon, setShowCreateCoupon] = useState(false);
 
   return (
     <main className="flex flex-col items-center min-h-screen bg-[var(--background)] text-[var(--foreground)] font-[var(--font-sans)]">
@@ -90,7 +87,7 @@ export default function HomePage() {
               desc: "Perfecto para los amantes de los lattes y postres caseros. Ambiente cálido y moderno.",
             },
             {
-              name: "Filadelfia Café Boutique",
+              name: "Cundinamarca café",
               img: "https://media-cdn.tripadvisor.com/media/photo-p/1d/15/44/48/filadelfia-c.jpg",
               desc: "Especialistas en espresso intenso y croissants recién horneados. Un clásico.",
             },
@@ -152,36 +149,11 @@ export default function HomePage() {
         <PromotionsSection />
       </motion.div>
 
-      {/* 🟢 BOTÓN DE GENERAR CUPÓN AL FINAL */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6 }}
-        className="w-full flex justify-center mt-12 mb-12"
-      >
-        <button
-          onClick={() => setShowCreateCoupon(!showCreateCoupon)}
-          className="bg-green-600 text-white px-8 py-4 rounded-xl hover:bg-green-700 transition-colors text-lg"
-        >
-          {showCreateCoupon ? "Cerrar Generador de Cupones" : "Generar Cupón"}
-        </button>
-      </motion.div>
-
-      {/* 🎟️ GENERADOR DE CUPONES */}
-      {showCreateCoupon && (
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-          className="w-full max-w-xl mb-12 px-4"
-        >
-          <CreateCoupon />
-        </motion.div>
-      )}
-
       {/* 🧡 FOOTER */}
       <footer className="w-full py-6 text-center bg-[#4b2e16] text-white mt-auto rounded-t-3xl">
-        <p>© {new Date().getFullYear()} Explorador Cafetero | Diseñado con ☕ y amor 💛</p>
+        <p>
+          © {new Date().getFullYear()} Explorador Cafetero | Diseñado con ☕ y amor 💛
+        </p>
       </footer>
     </main>
   );

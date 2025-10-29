@@ -14,7 +14,7 @@ const reviews = [
   },
   {
     name: "Diana P.",
-    text: "Filadelfia Café Boutique es mi favorito para trabajar, tiene una vibra tranquila y el espresso es espectacular.",
+    text: "Cundinamarca Café es mi favorito para trabajar, tiene una vibra tranquila y el espresso es espectacular.",
     img: "https://randomuser.me/api/portraits/women/43.jpg",
   },
 ];

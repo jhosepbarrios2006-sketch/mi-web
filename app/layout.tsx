@@ -34,13 +34,7 @@ export default function RootLayout({
               INICIO
             </Link>
 
-            <Link
-              href="/mapa"
-              className="hover:text-[#8d6e63] transition-colors duration-300"
-            >
-              MAPA
-            </Link>
-
+           
             <Link
               href="/contacto"
               className="hover:text-[#8d6e63] transition-colors duration-300"
