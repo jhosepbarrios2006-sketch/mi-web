@@ -113,7 +113,7 @@ export default function Cafeterias() {
                   <>
                     <div className="mt-5 bg-white p-2 rounded-lg">
                       <QRCode
-                        value={cafe.qr || `https://tusitio.com/descuentos/${cafe.id}`}
+                        value={cafe.qr || `https://mi-1en0ac6ni-jhoseps-projects-27468d5e.vercel.app///${cafe.id}`}
                         size={96}
                       />
                     </div>
