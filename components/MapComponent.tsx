@@ -16,9 +16,13 @@ const icon = new L.Icon({
 
 const cafes = [
   { name: "Café Rojas", lat: 4.34475710117145, lng: -74.36232121407947, desc: "Excelente ambiente y postres caseros." },
-  { name: "TayronaCafé", lat: 4.343461221774817, lng: -74.36263001975017, desc: "Café orgánico con vista a la montaña." },
+  { name: "TayronaCafé", lat: 4.343461221774817, lng: -74.36263001975017, desc: "Café orgánico con vista a la iglesia." },
   { name: "Cundinamarca Café", lat: 4.344295178445169, lng: -74.38823256581684, desc: "Perfecto para leer y relajarse." },
+  { name: "Café Zona Té", lat: 4.343921757957979, lng: -74.3632014617761, desc: "Excelente comida." },
+  { name: "Cafe Ritual Fusagasuga", lat: 4.33920505731868, lng: -74.36742087526875, desc: "Café orgánico con vista a la montaña." },
+  { name: "Juan Valdez", lat: 4.344295178445169, lng: -74.38823256581684, desc: "Perfecto para leer y relajarse." },
 ];
+
 
 export default function MapComponent() {
   return (

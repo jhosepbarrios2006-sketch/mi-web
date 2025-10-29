@@ -27,7 +27,9 @@ export default function CreateCoupon() {
       const code = `CUP-${couponId.slice(0, 8).toUpperCase()}`;
 
       // URL que se mostrará en el QR
-      const qrUrl = `https://tucafesite.com/redeem/${user.id}?coupon=${couponId}`;
+      const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
+        const qrUrl = `${siteUrl}/redeem/${user.id}?coupon=${couponId}`;
+
 
       // insertar en Supabase con owner_id (RLS)
       const { error } = await supabase.from("cupones").insert({

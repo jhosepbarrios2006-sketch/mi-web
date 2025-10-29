@@ -24,16 +24,16 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="login-background">
-      <div className="login-card w-96 text-center">
+    <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-[#f4ede4] to-[#e1c6b2] p-4">
+      <div className="bg-white rounded-2xl shadow-xl w-full max-w-md p-8 space-y-6">
         {/* 🔐 Título */}
-        <h1 className="hero-title mb-6">🔒 Ingresar</h1>
+        <h1 className="text-3xl font-bold text-[#b08968] text-center">🔒 Ingresar</h1>
 
         {/* 📧 Campo de correo */}
         <input
           type="email"
           placeholder="Correo electrónico"
-          className="login-input w-full mb-3 p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#b08968]"
+          className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#b08968] transition"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
         />
@@ -42,7 +42,7 @@ export default function LoginPage() {
         <input
           type="password"
           placeholder="Contraseña"
-          className="login-input w-full mb-4 p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#b08968]"
+          className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#b08968] transition"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
         />
@@ -50,7 +50,7 @@ export default function LoginPage() {
         {/* 🧡 Botón principal */}
         <button
           onClick={handleLogin}
-          className="btn w-full mb-3"
+          className="w-full bg-[#b08968] hover:bg-[#a06f4a] text-white font-semibold py-3 rounded-lg transition"
         >
           Iniciar Sesión
         </button>
@@ -58,20 +58,20 @@ export default function LoginPage() {
         {/* 🚀 Invitado */}
         <button
           onClick={handleGuest}
-          className="btn w-full bg-[#cbb39a] hover:bg-[#b08968]"
+          className="w-full bg-[#cbb39a] hover:bg-[#b89d7f] text-white font-semibold py-3 rounded-lg transition"
         >
           Continuar como Invitado
         </button>
 
         {/* 🔗 Registro */}
-        <p className="login-text text-sm mt-4">
+        <p className="text-center text-sm text-gray-600 mt-4">
           ¿No tienes cuenta?{" "}
-          <a
+          <span
             onClick={() => router.push("/register")}
-            className="cursor-pointer text-[#b08968] hover:underline"
+            className="cursor-pointer text-[#b08968] hover:underline font-medium"
           >
             Regístrate aquí
-          </a>
+          </span>
         </p>
       </div>
     </div>

@@ -14,53 +14,51 @@ export default function RegisterPage() {
       alert(error.message)
     } else {
       alert("Registro exitoso 🎉 Revisa tu correo para confirmar.")
-      router.push("/login") // después de registrarte, te envía al login
+      router.push("/login")
     }
   }
 
   return (
-    <div className="login-background">
-      <div className="login-card w-96 text-center">
-        {/* 📝 Título con estilo degradado */}
-        <h1 className="login-title">
-          <span>📝 Registro</span>
-        </h1>
+    <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-[#f4ede4] to-[#e1c6b2] p-4">
+      <div className="relative bg-white rounded-2xl shadow-xl w-full max-w-md p-8 space-y-6">
+        {/* Título */}
+        <h1 className="text-3xl font-bold text-[#b08968] text-center">📝 Registro</h1>
 
-        {/* 📧 Campo de correo */}
+        {/* Input correo */}
         <input
           type="email"
-          placeholder="Correo"
-          className="login-input w-full mb-3"
+          placeholder="Correo electrónico"
+          className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#b08968] transition"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
         />
 
-        {/* 🔑 Campo de contraseña */}
+        {/* Input contraseña */}
         <input
           type="password"
           placeholder="Contraseña"
-          className="login-input w-full mb-4"
+          className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#b08968] transition"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
         />
 
-        {/* ✅ Botón de registro */}
+        {/* Botón registro */}
         <button
           onClick={handleRegister}
-          className="btn w-full mb-3"
+          className="w-full bg-[#b08968] hover:bg-[#a06f4a] text-white font-semibold py-3 rounded-lg transition"
         >
           Registrarse
         </button>
 
-        {/* 🔙 Volver a inicio de sesión */}
-        <p className="login-text text-sm">
+        {/* Volver a login */}
+        <p className="text-center text-sm text-gray-600 mt-4">
           ¿Ya tienes cuenta?{" "}
-          <a
+          <span
             onClick={() => router.push("/login")}
-            className="cursor-pointer"
+            className="cursor-pointer text-[#b08968] hover:underline font-medium"
           >
             Inicia sesión
-          </a>
+          </span>
         </p>
       </div>
     </div>

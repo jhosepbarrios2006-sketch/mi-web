@@ -1,6 +1,10 @@
 "use client"
 
 import { useState } from "react"
+import { Playfair_Display, Lora } from "next/font/google"
+
+const playfair = Playfair_Display({ subsets: ["latin"], weight: "700" })
+const lora = Lora({ subsets: ["latin"], weight: ["400","700"] })
 
 export default function Contacto() {
   const [form, setForm] = useState({ nombre: "", email: "", mensaje: "" })
@@ -16,53 +20,58 @@ export default function Contacto() {
   }
 
   return (
-    <div className="login-background">
-      <div className="login-card w-full max-w-lg text-center">
-        {/*✉️ Título principal */}
-        <h1 className="login-title mb-6">📬 Contáctanos</h1>
+    <div className="min-h-screen flex items-center justify-center bg-[#FAF3E0] px-4 py-12">
+      <div className="w-full max-w-lg bg-[#D8BFAF] rounded-3xl shadow-lg p-10">
+        {/* ✉️ Título principal */}
+        <h1 className={`${playfair.className} text-4xl text-center text-[#E0B345] mb-8 drop-shadow-lg`}>
+          📬 Contáctanos
+        </h1>
 
         {/* 🧾 Formulario */}
-        <form onSubmit={handleSubmit} className="space-y-5 text-left">
+        <form onSubmit={handleSubmit} className={`${lora.className} space-y-6`}>
           {/* Nombre */}
           <div>
-            <label className="block text-brown-800 font-semibold mb-1">Nombre</label>
+            <label className="block text-[#4B3621] font-semibold mb-2">Nombre</label>
             <input
               type="text"
               name="nombre"
               value={form.nombre}
               onChange={handleChange}
               required
-              className="login-input w-full"
+              className="w-full px-4 py-3 rounded-xl border border-[#E0B345] focus:outline-none focus:ring-2 focus:ring-[#E0B345] bg-[#FAF3E0] text-[#4B3621]"
             />
           </div>
 
           {/* Correo */}
           <div>
-            <label className="block text-brown-800 font-semibold mb-1">Correo electrónico</label>
+            <label className="block text-[#4B3621] font-semibold mb-2">Correo electrónico</label>
             <input
               type="email"
               name="email"
               value={form.email}
               onChange={handleChange}
               required
-              className="login-input w-full"
+              className="w-full px-4 py-3 rounded-xl border border-[#E0B345] focus:outline-none focus:ring-2 focus:ring-[#E0B345] bg-[#FAF3E0] text-[#4B3621]"
             />
           </div>
 
           {/* Mensaje */}
           <div>
-            <label className="block text-brown-800 font-semibold mb-1">Mensaje</label>
+            <label className="block text-[#4B3621] font-semibold mb-2">Mensaje</label>
             <textarea
               name="mensaje"
               value={form.mensaje}
               onChange={handleChange}
               required
-              className="login-input w-full h-32 resize-none"
+              className="w-full h-32 px-4 py-3 rounded-xl border border-[#E0B345] focus:outline-none focus:ring-2 focus:ring-[#E0B345] bg-[#FAF3E0] text-[#4B3621] resize-none"
             />
           </div>
 
           {/* Botón */}
-          <button type="submit" className="btn w-full">
+          <button
+            type="submit"
+            className="w-full bg-[#E0B345] text-[#1E1E1E] font-bold py-3 rounded-xl hover:bg-[#D4A833] transition-colors"
+          >
             Enviar mensaje
           </button>
         </form>

@@ -5,8 +5,6 @@ import HistorySection from "../components/HistorySection";
 import ReviewsSection from "../components/ReviewsSection";
 import MapSection from "../components/MapSection";
 import PromotionsSection from "../components/PromotionsSection";
-console.log("🔍 URL Supabase:", process.env.NEXT_PUBLIC_SUPABASE_URL);
-
 
 export default function HomePage() {
   const router = useRouter();
@@ -39,15 +37,19 @@ export default function HomePage() {
             >
               VER CAFETERÍAS
             </button>
-            <button
-              onClick={() => alert('Función próximamente')}
-              className="hero-btn bg-yellow-500 text-black px-6 py-3 rounded-lg hover:bg-yellow-400 transition-colors"
-            >
-              RESERVA MESA
-            </button>
-          </div>
-        </div>
-      </motion.section>
+
+      {/* 🔹 NUEVO BOTÓN DE RECOMPENSAS */}
+      <button
+        onClick={() => router.push("/recompensas")}
+        className="hero-btn bg-yellow-500 text-black px-6 py-3 rounded-lg hover:bg-yellow-400 transition-colors"
+      >
+        MIS RECOMPENSAS 🎁
+             </button>
+         </div>
+             <p className="mt-4 text-lg text-yellow-100 drop-shadow-md">
+             </p>
+         </div>
+    </motion.section>
 
       {/* 🏞️ HISTORIA DE FUSAGASUGÁ */}
       <motion.div
@@ -131,6 +133,7 @@ export default function HomePage() {
 
       {/* 🗺️ MAPA */}
       <motion.div
+        id="mapaHome"
         initial={{ opacity: 0, y: 80 }}
         whileInView={{ opacity: 1, y: 0 }}
         transition={{ duration: 1 }}

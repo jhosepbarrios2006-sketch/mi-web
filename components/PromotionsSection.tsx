@@ -77,10 +77,11 @@ export default function PromotionsSection() {
         .select();
 
       if (upsertError) {
-  console.error("❌ Error guardando QR (upsert):", upsertError?.message || upsertError);
-} else {
-  console.log("✅ QR guardado/actualizado correctamente:", upsertData);
-}
+        console.error("❌ Error guardando QR (upsert):", upsertError);
+      } else {
+        console.log("✅ QR guardado/actualizado correctamente:", upsertData);
+        setUserQR(newQRValue);
+      }
 
       setLoading(false);
     };

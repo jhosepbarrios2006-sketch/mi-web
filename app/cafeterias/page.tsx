@@ -2,27 +2,46 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabaseClient";
 import QRCode from "react-qr-code";
-import PromotionsSection from "@/components/PromotionsSection";
 import CreateCoupon from "@/components/CreateCoupon";
 import { motion } from "framer-motion";
+import { useRouter } from "next/navigation";
 
 export default function Cafeterias() {
   const [cafes, setCafes] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [showCreateCoupon, setShowCreateCoupon] = useState(false);
+  const [user, setUser] = useState<any>(null);
+  const router = useRouter();
 
+  // Obtener usuario logueado
+  useEffect(() => {
+    const fetchUser = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      setUser(session?.user || null);
+    };
+    fetchUser();
+
+    const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user || null);
+    });
+    return () => listener.subscription.unsubscribe();
+  }, []);
+
+  // Cargar cafeterías
   useEffect(() => {
     const fetchCafes = async () => {
       const { data, error } = await supabase.from("cafeterias").select("*");
-      if (error) {
-        console.error("❌ Error al cargar cafeterías:", error);
-      } else {
-        setCafes(data);
-      }
+      if (error) console.error("❌ Error al cargar cafeterías:", error);
+      else setCafes(data);
       setLoading(false);
     };
     fetchCafes();
   }, []);
+
+  // Función para ir al mapa en Home
+  const goToMapa = () => {
+    router.push("/#mapaHome");
+  };
 
   if (loading)
     return (
@@ -48,16 +67,13 @@ export default function Cafeterias() {
           "url('https://images.pexels.com/photos/33350257/pexels-photo-33350257.jpeg')",
       }}
     >
-      {/* 🔳 Overlay oscuro */}
       <div className="absolute inset-0 bg-black/40 backdrop-blur-[2px]" />
 
-      {/* ✨ Contenido */}
       <div className="relative z-10 w-full max-w-6xl">
         <h1 className="text-5xl font-bold text-center text-white mb-12 drop-shadow-lg">
           ☕ Directorio de Cafeterías con Descuentos
         </h1>
 
-        {/* 🧋 Tarjetas de cafeterías */}
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-10">
           {cafes.map((cafe, i) => (
             <motion.div
@@ -66,7 +82,7 @@ export default function Cafeterias() {
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: i * 0.1 }}
               viewport={{ once: true }}
-              className="bg-white/95 rounded-2xl shadow-xl hover:scale-[1.03] transition-transform duration-300 overflow-hidden"
+              className="bg-white/95 rounded-2xl shadow-xl hover:scale-[1.03] transition-transform duration-300 overflow-hidden flex flex-col"
             >
               <img
                 src={cafe.img}
@@ -84,54 +100,66 @@ export default function Cafeterias() {
                   📍 {cafe.direccion}
                 </p>
 
-                {/* 🔳 QR (desde BD o generado) */}
-                <div className="mt-5 bg-white p-2 rounded-lg">
-                  <QRCode
-                    value={
-                      cafe.qr ||
-                      `https://tusitio.com/descuentos/${cafe.id}`
-                    }
-                    size={96}
-                  />
-                </div>
+                {/* Botón para ver mapa */}
+                <button
+                  onClick={goToMapa}
+                  className="mt-2 text-yellow-500 underline text-sm"
+                >
+                  Ver en el mapa
+                </button>
 
-                <p className="text-sm text-gray-600 mt-2">
-                  Escanea para ver descuentos ☕
-                </p>
+                {/* Mostrar QR solo si el usuario está logueado */}
+                {user ? (
+                  <>
+                    <div className="mt-5 bg-white p-2 rounded-lg">
+                      <QRCode
+                        value={cafe.qr || `https://tusitio.com/descuentos/${cafe.id}`}
+                        size={96}
+                      />
+                    </div>
+                    <p className="text-sm text-gray-600 mt-2">
+                      Escanea para ver descuentos ☕
+                    </p>
+                  </>
+                ) : (
+                  <p className="text-sm text-gray-300 mt-2 text-center">
+                    Inicia sesión para ver los descuentos ☕
+                  </p>
+                )}
               </div>
             </motion.div>
           ))}
         </div>
 
-        {/* Si no hay cafeterías */}
         {cafes.length === 0 && (
           <p className="text-center mt-10 text-white font-medium drop-shadow-md">
             No hay cafeterías registradas todavía ☕
           </p>
         )}
 
-        
+        {/* Botón y generador de cupones solo para usuarios logueados */}
+        {user && (
+          <>
+            <div className="w-full flex justify-center mt-12 mb-12">
+              <button
+                onClick={() => setShowCreateCoupon(!showCreateCoupon)}
+                className="bg-green-600 text-white px-8 py-4 rounded-xl hover:bg-green-700 transition-colors text-lg"
+              >
+                {showCreateCoupon ? "Cerrar Generador de Cupones" : "Generar Cupón"}
+              </button>
+            </div>
 
-        {/* 🟢 Botón para generar cupón */}
-        <div className="w-full flex justify-center mt-12 mb-12">
-          <button
-            onClick={() => setShowCreateCoupon(!showCreateCoupon)}
-            className="bg-green-600 text-white px-8 py-4 rounded-xl hover:bg-green-700 transition-colors text-lg"
-          >
-            {showCreateCoupon ? "Cerrar Generador de Cupones" : "Generar Cupón"}
-          </button>
-        </div>
-
-        {/* 🎟️ Generador de cupones */}
-        {showCreateCoupon && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-            className="w-full max-w-xl mb-12 px-4 mx-auto"
-          >
-            <CreateCoupon />
-          </motion.div>
+            {showCreateCoupon && (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5 }}
+                className="w-full max-w-xl mb-12 px-4 mx-auto"
+              >
+                <CreateCoupon />
+              </motion.div>
+            )}
+          </>
         )}
       </div>
     </main>
