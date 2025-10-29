@@ -1,15 +1,16 @@
+// File: app/api/generate-qr/route.ts
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
-import QRCode from "qrcode"; // 👈 Esta sí es segura en el backend
-
-// Conexión segura a Supabase
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
+import QRCode from "qrcode"; // Seguro para backend
 
 export async function POST(req: Request) {
   try {
+    // Inicializamos Supabase aquí para evitar errores de prerender
+    const supabase = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!
+    );
+
     const { userId, email } = await req.json();
 
     if (!userId || !email) {
@@ -39,7 +40,7 @@ export async function POST(req: Request) {
     return NextResponse.json({
       success: true,
       qr: qrDataUrl,
-      redeemUrl,
+      redeemUrl, // útil si quieres mostrar el enlace en frontend
     });
   } catch (err) {
     console.error("❌ Error generando QR:", err);
