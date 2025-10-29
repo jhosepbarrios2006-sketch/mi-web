@@ -5,6 +5,8 @@ import HistorySection from "../components/HistorySection";
 import ReviewsSection from "../components/ReviewsSection";
 import MapSection from "../components/MapSection";
 import PromotionsSection from "../components/PromotionsSection";
+console.log("🔍 URL Supabase:", process.env.NEXT_PUBLIC_SUPABASE_URL);
+
 
 export default function HomePage() {
   const router = useRouter();

@@ -10,7 +10,9 @@
   "dependencies": {
     "@supabase/auth-helpers-nextjs": "^0.10.0",
     "@supabase/supabase-js": "^2.76.1",
+    "@zxing/library": "^0.21.3",
     "framer-motion": "^12.23.24",
+    "html5-qrcode": "^2.3.8",
     "leaflet": "^1.9.4",
     "next": "15.5.4",
     "qrcode": "^1.5.4",
@@ -18,8 +20,7 @@
     "react-dom": "19.1.0",
     "react-leaflet": "^5.0.0",
     "react-qr-code": "^2.0.18",
-    "react-qr-reader": "^3.0.0-beta-1",
-    "react-qrcode-scanner": "^1.2.4",
+    "react-qr-reader-es6": "^2.2.1-2",
     "uuid": "^13.0.0"
   },
   "devDependencies": {

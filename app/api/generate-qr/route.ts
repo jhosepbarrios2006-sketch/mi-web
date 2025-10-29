@@ -1,32 +1,51 @@
 import { NextResponse } from "next/server";
-import * as QRCode from "qrcode";  // ✅ Librería correcta
 import { createClient } from "@supabase/supabase-js";
+import QRCode from "qrcode"; // 👈 Esta sí es segura en el backend
 
+// Conexión segura a Supabase
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY! // ✅ clave segura
+  process.env.SUPABASE_SERVICE_ROLE_KEY!
 );
 
 export async function POST(req: Request) {
   try {
     const { userId, email } = await req.json();
 
-    // Generar un código único
-    const uniqueCode = `${email}-${Date.now()}`;
+    if (!userId || !email) {
+      return NextResponse.json({
+        success: false,
+        error: "Faltan parámetros: userId o email.",
+      });
+    }
 
-    // Crear el QR como Data URL (base64)
-    const qrDataUrl = await QRCode.toDataURL(uniqueCode);
+    // Generar URL de redención
+    const siteUrl =
+      process.env.NEXT_PUBLIC_SITE_URL || "https://tuapp.vercel.app";
+    const redeemUrl = `${siteUrl}/redeem/${userId}?email=${encodeURIComponent(
+      email
+    )}`;
 
-    // Guardar en Supabase
-    const { data, error } = await supabase
+    // Generar el QR (imagen en base64)
+    const qrDataUrl = await QRCode.toDataURL(redeemUrl);
+
+    // Guardar o actualizar en Supabase
+    const { error } = await supabase
       .from("user_qr_codes")
-      .insert([{ user_id: userId, qr_code: qrDataUrl }]);
+      .upsert([{ user_id: userId, qr_code: qrDataUrl }]);
 
     if (error) throw error;
 
-    return NextResponse.json({ success: true, qr: qrDataUrl });
+    return NextResponse.json({
+      success: true,
+      qr: qrDataUrl,
+      redeemUrl,
+    });
   } catch (err) {
-    console.error(err);
-    return NextResponse.json({ success: false, error: String(err) });
+    console.error("❌ Error generando QR:", err);
+    return NextResponse.json({
+      success: false,
+      error: String(err),
+    });
   }
 }
