@@ -166,11 +166,22 @@ export default function EditarCafeteriasPage() {
   // Mostrar pantalla de carga mientras verifica
   if (verificando || loading) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-br from-amber-50 to-orange-100">
-        <div className="text-center">
-          <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-amber-900 mb-4"></div>
-          <p className="text-xl text-amber-900">
-            {verificando ? "Verificando permisos..." : "Cargando..."}
+      <div 
+        className="flex flex-col items-center justify-center min-h-screen"
+        style={{
+          backgroundImage: 'url("https://images.pexels.com/photos/33350257/pexels-photo-33350257.jpeg")',
+          backgroundSize: 'cover',
+          backgroundPosition: 'center'
+        }}
+      >
+        <div className="absolute inset-0 bg-black/50 backdrop-blur-sm"></div>
+        <div className="relative text-center bg-white/90 backdrop-blur-md p-12 rounded-3xl shadow-2xl">
+          <div className="inline-block animate-spin rounded-full h-16 w-16 border-4 border-[#d4a574] border-t-transparent mb-6"></div>
+          <p className="text-2xl text-[#6b4226] font-bold">
+            {verificando ? "☕ Verificando permisos..." : "Cargando panel..."}
+          </p>
+          <p className="text-sm text-gray-600 mt-2">
+            Solo los administradores pueden acceder
           </p>
         </div>
       </div>
@@ -178,56 +189,70 @@ export default function EditarCafeteriasPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-amber-50 to-orange-100 p-8">
-      {/* Header */}
-      <div className="max-w-7xl mx-auto mb-8">
-        <div className="flex justify-between items-center">
-          <div>
-            <h1 className="text-4xl font-bold text-amber-900">
-              ☕ Panel de Administración
-            </h1>
-            <p className="text-amber-700 mt-2">
-              Gestiona las cafeterías del directorio
-            </p>
+    <div className="min-h-screen bg-[#f4ede4] p-8">
+      {/* Header con gradiente café */}
+      <div className="max-w-7xl mx-auto mb-12">
+        <div 
+          className="bg-gradient-to-r from-[#6b4226] to-[#8b5a3c] rounded-2xl shadow-2xl p-8 text-white"
+          style={{
+            backgroundImage: 'url("https://images.pexels.com/photos/33350257/pexels-photo-33350257.jpeg")',
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+            backgroundBlendMode: 'multiply',
+            backgroundColor: 'rgba(107, 66, 38, 0.85)'
+          }}
+        >
+          <div className="flex justify-between items-center">
+            <div>
+              <h1 className="text-5xl font-bold mb-3 drop-shadow-lg">
+                ☕ Panel de Administración
+              </h1>
+              <p className="text-xl text-white/90 drop-shadow">
+                Gestiona las cafeterías más especiales de la ciudad
+              </p>
+            </div>
+            <button
+              onClick={logout}
+              className="bg-white/20 backdrop-blur-sm hover:bg-white/30 text-white px-6 py-3 rounded-xl font-semibold transition border border-white/30 shadow-lg"
+            >
+              🚪 Cerrar Sesión
+            </button>
           </div>
-          <button
-            onClick={logout}
-            className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg transition"
-          >
-            Cerrar Sesión
-          </button>
         </div>
       </div>
 
-      {/* Botón agregar */}
-      <div className="max-w-7xl mx-auto mb-6">
+      {/* Botón agregar con estilo café */}
+      <div className="max-w-7xl mx-auto mb-8">
         <button
           onClick={handleAdd}
-          className="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg font-semibold transition"
+          className="bg-[#d4a574] hover:bg-[#c9985d] text-white px-8 py-4 rounded-xl font-bold text-lg shadow-lg transition-all hover:scale-105 hover:shadow-xl"
         >
-          ➕ Agregar Cafetería
+          ➕ Agregar Nueva Cafetería
         </button>
       </div>
 
-      {/* Lista de cafeterías */}
-      <div className="max-w-7xl mx-auto grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+      {/* Lista de cafeterías con diseño elegante */}
+      <div className="max-w-7xl mx-auto grid gap-8 md:grid-cols-2 lg:grid-cols-3">
         {cafes.map((cafe) => (
           <div
             key={cafe.id}
-            className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition"
+            className="bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-2xl transition-all hover:-translate-y-1 border border-[#e1c6b2]"
           >
             {cafe.img && (
-              <img
-                src={cafe.img}
-                alt={cafe.nombre}
-                className="w-full h-48 object-cover"
-              />
+              <div className="relative h-52 overflow-hidden">
+                <img
+                  src={cafe.img}
+                  alt={cafe.nombre}
+                  className="w-full h-full object-cover transition-transform hover:scale-110 duration-300"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent"></div>
+              </div>
             )}
 
             <div className="p-6">
               {editando === cafe.id ? (
-                // Modo edición
-                <div className="space-y-3">
+                // Modo edición con inputs estilizados
+                <div className="space-y-4">
                   <input
                     type="text"
                     value={formData.nombre || ""}
@@ -235,7 +260,7 @@ export default function EditarCafeteriasPage() {
                       setFormData({ ...formData, nombre: e.target.value })
                     }
                     placeholder="Nombre"
-                    className="w-full p-2 border rounded-lg"
+                    className="w-full p-3 border-2 border-[#d4a574] rounded-xl focus:outline-none focus:border-[#b08968] transition"
                   />
                   <textarea
                     value={formData.descripcion || ""}
@@ -243,7 +268,7 @@ export default function EditarCafeteriasPage() {
                       setFormData({ ...formData, descripcion: e.target.value })
                     }
                     placeholder="Descripción"
-                    className="w-full p-2 border rounded-lg"
+                    className="w-full p-3 border-2 border-[#d4a574] rounded-xl focus:outline-none focus:border-[#b08968] transition resize-none"
                     rows={3}
                   />
                   <input
@@ -252,8 +277,8 @@ export default function EditarCafeteriasPage() {
                     onChange={(e) =>
                       setFormData({ ...formData, ubicacion: e.target.value })
                     }
-                    placeholder="Ubicación"
-                    className="w-full p-2 border rounded-lg"
+                    placeholder="📍 Ubicación"
+                    className="w-full p-3 border-2 border-[#d4a574] rounded-xl focus:outline-none focus:border-[#b08968] transition"
                   />
                   <input
                     type="text"
@@ -261,48 +286,51 @@ export default function EditarCafeteriasPage() {
                     onChange={(e) =>
                       setFormData({ ...formData, img: e.target.value })
                     }
-                    placeholder="URL de imagen"
-                    className="w-full p-2 border rounded-lg"
+                    placeholder="🖼️ URL de imagen"
+                    className="w-full p-3 border-2 border-[#d4a574] rounded-xl focus:outline-none focus:border-[#b08968] transition"
                   />
 
-                  <div className="flex gap-2">
+                  <div className="flex gap-3 pt-2">
                     <button
                       onClick={saveEdit}
-                      className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg transition"
+                      className="flex-1 bg-[#6b4226] hover:bg-[#543318] text-white py-3 rounded-xl font-semibold transition shadow-md hover:shadow-lg"
                     >
                       💾 Guardar
                     </button>
                     <button
                       onClick={cancelEdit}
-                      className="flex-1 bg-gray-400 hover:bg-gray-500 text-white py-2 rounded-lg transition"
+                      className="flex-1 bg-gray-400 hover:bg-gray-500 text-white py-3 rounded-xl font-semibold transition shadow-md"
                     >
                       ❌ Cancelar
                     </button>
                   </div>
                 </div>
               ) : (
-                // Modo vista
+                // Modo vista elegante
                 <>
-                  <h2 className="text-2xl font-bold text-amber-900 mb-2">
+                  <h2 className="text-2xl font-bold text-[#6b4226] mb-3">
                     {cafe.nombre}
                   </h2>
-                  <p className="text-gray-700 mb-3">{cafe.descripcion}</p>
+                  <p className="text-gray-700 mb-4 leading-relaxed">
+                    {cafe.descripcion}
+                  </p>
                   {(cafe.ubicacion || cafe.direccion) && (
-                    <p className="text-sm text-gray-600 mb-4">
-                      📍 {cafe.ubicacion || cafe.direccion}
+                    <p className="text-sm text-[#8b5a3c] mb-5 flex items-center gap-2">
+                      <span className="text-lg">📍</span>
+                      {cafe.ubicacion || cafe.direccion}
                     </p>
                   )}
 
-                  <div className="flex gap-2">
+                  <div className="flex gap-3">
                     <button
                       onClick={() => startEdit(cafe)}
-                      className="flex-1 bg-blue-500 hover:bg-blue-600 text-white py-2 rounded-lg transition"
+                      className="flex-1 bg-[#d4a574] hover:bg-[#c9985d] text-white py-3 rounded-xl font-semibold transition shadow-md hover:shadow-lg"
                     >
                       ✏️ Editar
                     </button>
                     <button
                       onClick={() => handleDelete(cafe.id, cafe.nombre)}
-                      className="flex-1 bg-red-500 hover:bg-red-600 text-white py-2 rounded-lg transition"
+                      className="flex-1 bg-[#a8624f] hover:bg-[#8b4e3d] text-white py-3 rounded-xl font-semibold transition shadow-md hover:shadow-lg"
                     >
                       🗑️ Eliminar
                     </button>
@@ -315,10 +343,15 @@ export default function EditarCafeteriasPage() {
       </div>
 
       {cafes.length === 0 && (
-        <div className="max-w-7xl mx-auto text-center py-12">
-          <p className="text-xl text-gray-600">
-            No hay cafeterías registradas. ¡Agrega la primera!
-          </p>
+        <div className="max-w-7xl mx-auto text-center py-20">
+          <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-12 shadow-xl border border-[#e1c6b2]">
+            <p className="text-2xl text-[#6b4226] font-semibold mb-3">
+              ☕ No hay cafeterías registradas
+            </p>
+            <p className="text-gray-600">
+              ¡Agrega la primera cafetería especial de la ciudad!
+            </p>
+          </div>
         </div>
       )}
     </div>
