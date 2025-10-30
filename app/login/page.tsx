@@ -12,7 +12,8 @@ export default function LoginPage() {
   const handleLogin = async () => {
     setLoading(true);
 
-    const { data: sessionData, error } = await supabase.auth.signInWithPassword({
+    // 🔐 Iniciar sesión con Supabase Auth
+    const { error } = await supabase.auth.signInWithPassword({
       email,
       password,
     });
@@ -23,26 +24,27 @@ export default function LoginPage() {
       return;
     }
 
-    // ✅ Buscar el rol del usuario en la tabla 'usuarios'
+    // ✅ Buscar el rol en la tabla 'usuarios'
     const { data: userData, error: roleError } = await supabase
       .from("usuarios")
-      .select("role")
+      .select("rol") // 👈 CAMBIADO
       .eq("email", email)
       .single();
 
-    if (roleError) {
+    if (roleError || !userData) {
       alert("⚠️ No se pudo obtener el rol del usuario");
+      console.error(roleError);
       setLoading(false);
       return;
     }
 
     // ✅ Redirigir según el rol
-    if (userData?.role === "admin") {
+    if (userData.rol === "admin") {
       alert("Bienvenido administrador 👑");
-      router.push("/admin");
+      router.push("/admin"); // asegúrate de tener esta ruta creada
     } else {
       alert("Login exitoso 🎉");
-      router.push("/cafeterias");
+      router.push("/cafeterias"); // o la ruta que prefieras para usuarios normales
     }
 
     setLoading(false);
