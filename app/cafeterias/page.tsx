@@ -1,33 +1,49 @@
 "use client";
+
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabaseClient";
 import QRCode from "react-qr-code";
 import CreateCoupon from "@/components/CreateCoupon";
 import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 
-export default function Cafeterias() {
+export default function CafeteriasPage() {
   const [cafes, setCafes] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [showCreateCoupon, setShowCreateCoupon] = useState(false);
   const [user, setUser] = useState<any>(null);
+  const [rol, setRol] = useState<string | null>(null);
   const router = useRouter();
 
-  // Obtener usuario logueado
+  // 🧠 Obtener usuario y rol
   useEffect(() => {
-    const fetchUser = async () => {
+    const fetchUserAndRole = async () => {
       const { data: { session } } = await supabase.auth.getSession();
-      setUser(session?.user || null);
+      const currentUser = session?.user || null;
+      setUser(currentUser);
+
+      if (currentUser) {
+        const { data: userData, error } = await supabase
+          .from("usuarios")
+          .select("rol")
+          .eq("email", currentUser.email)
+          .maybeSingle();
+
+        if (!error && userData?.rol) setRol(userData.rol);
+      }
     };
-    fetchUser();
+
+    fetchUserAndRole();
 
     const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user || null);
     });
+
     return () => listener.subscription.unsubscribe();
   }, []);
 
-  // Cargar cafeterías
+  // ☕ Cargar cafeterías
   useEffect(() => {
     const fetchCafes = async () => {
       const { data, error } = await supabase.from("cafeterias").select("*");
@@ -38,7 +54,7 @@ export default function Cafeterias() {
     fetchCafes();
   }, []);
 
-  // Función para ir al mapa en Home
+  // 📍 Ir al mapa
   const goToMapa = () => {
     router.push("/#mapaHome");
   };
@@ -74,6 +90,19 @@ export default function Cafeterias() {
           ☕ Directorio de Cafeterías con Descuentos
         </h1>
 
+        {/* 🔒 Solo el admin ve este botón */}
+        {rol === "admin" && (
+          <div className="flex justify-center mb-10">
+            <Link
+              href="/editar-cafeterias"
+              className="bg-yellow-600 hover:bg-yellow-700 text-white px-6 py-3 rounded-xl font-semibold shadow-lg transition-all"
+            >
+              ✏️ Editar Cafeterías
+            </Link>
+          </div>
+        )}
+
+        {/* 🏪 Lista de cafeterías */}
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-10">
           {cafes.map((cafe, i) => (
             <motion.div
@@ -84,11 +113,13 @@ export default function Cafeterias() {
               viewport={{ once: true }}
               className="bg-white/95 rounded-2xl shadow-xl hover:scale-[1.03] transition-transform duration-300 overflow-hidden flex flex-col"
             >
-              <img
-                src={cafe.img}
-                alt={cafe.nombre}
-                className="h-52 w-full object-cover rounded-t-2xl"
-              />
+              {cafe.img && (
+                <img
+                  src={cafe.img}
+                  alt={cafe.nombre}
+                  className="h-52 w-full object-cover rounded-t-2xl"
+                />
+              )}
               <div className="p-6 text-left flex flex-col items-center">
                 <h2 className="text-2xl font-semibold text-[#4b2e16] mb-2 text-center">
                   {cafe.nombre}
@@ -97,10 +128,10 @@ export default function Cafeterias() {
                   {cafe.descripcion}
                 </p>
                 <p className="text-sm text-[#6b4e2e] mt-3 text-center">
-                  📍 {cafe.direccion}
+                  📍 {cafe.direccion || cafe.ubicacion}
                 </p>
 
-                {/* Botón para ver mapa */}
+                {/* Botón para ver en mapa */}
                 <button
                   onClick={goToMapa}
                   className="mt-2 text-yellow-500 underline text-sm"
@@ -113,7 +144,10 @@ export default function Cafeterias() {
                   <>
                     <div className="mt-5 bg-white p-2 rounded-lg">
                       <QRCode
-                        value={cafe.qr || `https://mi-1en0ac6ni-jhoseps-projects-27468d5e.vercel.app///${cafe.id}`}
+                        value={
+                          cafe.qr ||
+                          `https://mi-1en0ac6ni-jhoseps-projects-27468d5e.vercel.app/cafeteria/${cafe.id}`
+                        }
                         size={96}
                       />
                     </div>
@@ -137,7 +171,7 @@ export default function Cafeterias() {
           </p>
         )}
 
-        {/* Botón y generador de cupones solo para usuarios logueados */}
+        {/* 🎟️ Generador de cupones solo para usuarios logueados */}
         {user && (
           <>
             <div className="w-full flex justify-center mt-12 mb-12">
@@ -145,7 +179,9 @@ export default function Cafeterias() {
                 onClick={() => setShowCreateCoupon(!showCreateCoupon)}
                 className="bg-green-600 text-white px-8 py-4 rounded-xl hover:bg-green-700 transition-colors text-lg"
               >
-                {showCreateCoupon ? "Cerrar Generador de Cupones" : "Generar Cupón"}
+                {showCreateCoupon
+                  ? "Cerrar Generador de Cupones"
+                  : "Generar Cupón"}
               </button>
             </div>
 
