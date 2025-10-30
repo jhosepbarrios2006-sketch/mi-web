@@ -63,5 +63,7 @@ export async function middleware(req: NextRequest) {
 
 // ⚙️ Define las rutas protegidas
 export const config = {
-  matcher: ["/admin/:path*", "/cafeterias/:path*"], // 👈 cambia o agrega más si quieres
+  matcher: ["/admin/:path*"], // solo protege /admin
 };
+
+
