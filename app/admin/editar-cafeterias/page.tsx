@@ -13,221 +13,145 @@ interface Cafeteria {
 }
 
 export default function EditarCafeteriasPage() {
-  const router = useRouter();
-  const [cafeterias, setCafeterias] = useState<Cafeteria[]>([]);
-  const [editando, setEditando] = useState<string | null>(null);
-  const [formData, setFormData] = useState<Omit<Cafeteria, "id">>({
-    nombre: "",
-    descripcion: "",
-    ubicacion: "",
-    horario: "",
-  });
+  const [user, setUser] = useState<any>(null);
+  const [rol, setRol] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
-  const [mensaje, setMensaje] = useState<string | null>(null);
+  const [cafes, setCafes] = useState<Cafeteria[]>([]);
+  const router = useRouter();
 
-  // 🔍 Cargar cafeterías
-  const cargarCafeterias = async () => {
-    const { data, error } = await supabase
-      .from("cafeterias")
-      .select("*")
-      .order("nombre", { ascending: true });
-
-    if (error) {
-      console.error("❌ Error cargando cafeterías:", error);
-      setMensaje("Error al cargar las cafeterías");
-      return;
-    }
-
-    setCafeterias(data || []);
-  };
-
-  // 🧠 Verificar sesión y rol
+  // 🔑 Verificar usuario y rol
   useEffect(() => {
-    const verificarRol = async () => {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
+    const fetchUserAndRole = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      const currentUser = session?.user || null;
+      setUser(currentUser);
 
-      if (!user) {
+      if (!currentUser) {
         router.push("/login");
         return;
       }
 
-      const { data: userData } = await supabase
+      const { data: userData, error } = await supabase
         .from("usuarios")
         .select("rol")
-        .eq("email", user.email)
+        .eq("email", currentUser.email)
         .maybeSingle();
 
-      if (userData?.rol !== "admin") {
-        alert("🚫 No tienes permiso para acceder aquí.");
-        router.push("/");
+      if (error || !userData) {
+        console.error("❌ Error obteniendo rol del usuario:", error);
+        router.push("/login");
         return;
       }
 
-      await cargarCafeterias();
+      setRol(userData.rol);
+
+      if (userData.rol !== "admin") {
+        console.warn("🚫 Usuario no autorizado. Redirigiendo...");
+        router.push("/cafeterias");
+        return;
+      }
+
+      await fetchCafeterias();
       setLoading(false);
     };
 
-    verificarRol();
+    fetchUserAndRole();
   }, [router]);
 
-  // ✏️ Iniciar edición
-  const editarCafeteria = (caf: Cafeteria) => {
-    setEditando(caf.id);
-    setFormData({
-      nombre: caf.nombre || "",
-      descripcion: caf.descripcion || "",
-      ubicacion: caf.ubicacion || "",
-      horario: caf.horario || "",
-    });
-  };
-
-  // ❌ Cancelar edición
-  const cancelarEdicion = () => {
-    setEditando(null);
-    setFormData({
-      nombre: "",
-      descripcion: "",
-      ubicacion: "",
-      horario: "",
-    });
-  };
-
-  // 💾 Guardar cambios
-  const guardarCambios = async () => {
-    if (!editando) return;
-    if (!formData.nombre.trim()) {
-      alert("⚠️ El nombre es obligatorio");
+  // ☕ Obtener cafeterías
+  const fetchCafeterias = async () => {
+    const { data, error } = await supabase.from("cafeterias").select("*");
+    if (error) {
+      console.error("❌ Error al cargar cafeterías:", error);
       return;
     }
+    setCafes(data || []);
+  };
+
+  // ➕ Agregar cafetería
+  const handleAdd = async () => {
+    const nombre = prompt("Nombre de la cafetería:");
+    const descripcion = prompt("Descripción:");
+    if (!nombre) return;
 
     const { error } = await supabase
       .from("cafeterias")
-      .update(formData)
-      .eq("id", editando);
+      .insert([{ nombre, descripcion }]);
 
     if (error) {
-      console.error("❌ Error al guardar:", error);
-      setMensaje("Error al guardar los cambios");
-      return;
+      console.error("❌ Error al agregar cafetería:", error);
+    } else {
+      await fetchCafeterias();
     }
-
-    // 🔄 Actualizar en tiempo real sin recargar
-    setCafeterias((prev) =>
-      prev.map((c) => (c.id === editando ? { ...c, ...formData } : c))
-    );
-
-    setMensaje("✅ Cambios guardados correctamente");
-    cancelarEdicion();
-
-    setTimeout(() => setMensaje(null), 2500);
   };
 
-  // ⏳ Loading
-  if (loading) {
+  // 🗑️ Eliminar cafetería
+  const handleDelete = async (id: string) => {
+    const confirmDelete = confirm("¿Seguro que deseas eliminar esta cafetería?");
+    if (!confirmDelete) return;
+
+    const { error } = await supabase.from("cafeterias").delete().eq("id", id);
+    if (error) console.error("❌ Error al eliminar cafetería:", error);
+    await fetchCafeterias();
+  };
+
+  if (loading)
     return (
-      <div className="p-6 text-center">
-        <p className="text-lg text-gray-600">Cargando cafeterías...</p>
+      <div className="flex justify-center items-center h-screen text-lg">
+        Cargando panel de administración...
       </div>
     );
-  }
 
   return (
-    <div className="p-6 max-w-4xl mx-auto space-y-6">
-      <h1 className="text-3xl font-bold text-[#b08968] text-center">
-        ☕ Editar Cafeterías
+    <div className="p-8 space-y-6 min-h-screen bg-gradient-to-br from-yellow-50 to-orange-100">
+      <h1 className="text-3xl font-bold text-center text-brown-800">
+        ☕ Panel de Administración
       </h1>
 
-      {mensaje && (
-        <p className="text-center text-green-600 font-medium">{mensaje}</p>
-      )}
+      <p className="text-center text-gray-700">
+        Bienvenido, <span className="font-semibold">{user?.email}</span>
+      </p>
 
-      {cafeterias.length === 0 ? (
-        <p className="text-center text-gray-500">
-          No hay cafeterías registradas
-        </p>
-      ) : (
-        cafeterias.map((caf) => (
+      <div className="flex justify-center">
+        <button
+          onClick={handleAdd}
+          className="px-6 py-3 bg-green-600 text-white rounded-xl hover:bg-green-700 transition"
+        >
+          ➕ Agregar Cafetería
+        </button>
+      </div>
+
+      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {cafes.map((cafe) => (
           <div
-            key={caf.id}
-            className="bg-white p-4 shadow-md rounded-lg space-y-2"
+            key={cafe.id}
+            className="border rounded-xl p-5 shadow-md bg-white hover:shadow-lg transition flex flex-col justify-between"
           >
-            {editando === caf.id ? (
-              <>
-                <input
-                  type="text"
-                  value={formData.nombre}
-                  onChange={(e) =>
-                    setFormData({ ...formData, nombre: e.target.value })
-                  }
-                  className="w-full border p-2 rounded-lg focus:ring-2 focus:ring-[#b08968]"
-                  placeholder="Nombre *"
-                />
-                <textarea
-                  value={formData.descripcion}
-                  onChange={(e) =>
-                    setFormData({ ...formData, descripcion: e.target.value })
-                  }
-                  className="w-full border p-2 rounded-lg focus:ring-2 focus:ring-[#b08968]"
-                  placeholder="Descripción"
-                  rows={3}
-                />
-                <input
-                  type="text"
-                  value={formData.ubicacion}
-                  onChange={(e) =>
-                    setFormData({ ...formData, ubicacion: e.target.value })
-                  }
-                  className="w-full border p-2 rounded-lg focus:ring-2 focus:ring-[#b08968]"
-                  placeholder="Ubicación"
-                />
-                <input
-                  type="text"
-                  value={formData.horario}
-                  onChange={(e) =>
-                    setFormData({ ...formData, horario: e.target.value })
-                  }
-                  className="w-full border p-2 rounded-lg focus:ring-2 focus:ring-[#b08968]"
-                  placeholder="Horario"
-                />
-                <div className="flex gap-2 mt-3">
-                  <button
-                    onClick={guardarCambios}
-                    className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition-colors"
-                  >
-                    💾 Guardar
-                  </button>
-                  <button
-                    onClick={cancelarEdicion}
-                    className="bg-gray-400 hover:bg-gray-500 text-white px-4 py-2 rounded-lg transition-colors"
-                  >
-                    ❌ Cancelar
-                  </button>
-                </div>
-              </>
-            ) : (
-              <>
-                <h2 className="font-bold text-xl text-[#b08968]">
-                  {caf.nombre}
-                </h2>
-                {caf.descripcion && (
-                  <p className="text-gray-600">{caf.descripcion}</p>
-                )}
-                {caf.ubicacion && (
-                  <p className="text-sm">📍 {caf.ubicacion}</p>
-                )}
-                {caf.horario && <p className="text-sm">🕒 {caf.horario}</p>}
-                <button
-                  onClick={() => editarCafeteria(caf)}
-                  className="mt-2 bg-[#b08968] hover:bg-[#a06f4a] text-white px-4 py-2 rounded-lg transition-colors"
-                >
-                  ✏️ Editar
-                </button>
-              </>
-            )}
+            <div>
+              <h2 className="text-xl font-semibold text-brown-800">
+                {cafe.nombre}
+              </h2>
+              <p className="text-gray-600 mt-1">{cafe.descripcion}</p>
+              {cafe.ubicacion && (
+                <p className="text-sm text-gray-500 mt-2">
+                  📍 {cafe.ubicacion}
+                </p>
+              )}
+            </div>
+            <button
+              onClick={() => handleDelete(cafe.id)}
+              className="mt-4 bg-red-500 text-white px-3 py-1 rounded-xl hover:bg-red-600 transition"
+            >
+              🗑️ Eliminar
+            </button>
           </div>
-        ))
+        ))}
+      </div>
+
+      {cafes.length === 0 && (
+        <p className="text-center text-gray-600 mt-6">
+          No hay cafeterías registradas aún ☕
+        </p>
       )}
     </div>
   );
