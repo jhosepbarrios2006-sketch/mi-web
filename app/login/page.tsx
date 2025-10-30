@@ -25,8 +25,9 @@ export default function LoginPage() {
       return;
     }
 
-    const user = loginData.user;
+   const { data: { user } } = await supabase.auth.getUser();
     console.log("✅ Usuario autenticado:", user);
+
 
     if (!user) {
       alert("❌ No se pudo obtener el usuario después del login");
@@ -38,7 +39,7 @@ export default function LoginPage() {
     const { data: userData, error: roleError } = await supabase
       .from("usuarios")
       .select("rol")
-      .eq("uuid", user.id) // 👈 Importante: usamos el UID del sistema de autenticación
+      .eq("email", user.email) // 👈 Importante: usamos el UID del sistema de autenticación
       .single();
 
     console.log("🧭 Resultado de búsqueda de usuario:", userData, roleError);
