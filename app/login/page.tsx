@@ -31,6 +31,8 @@ export default function LoginPage() {
       .eq("email", email)
       .single();
 
+      console.log("🔎 Resultado de búsqueda de usuario:", userData, roleError);
+      
     if (roleError || !userData) {
       alert("⚠️ No se pudo obtener el rol del usuario");
       console.error(roleError);
