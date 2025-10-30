@@ -1,32 +1,53 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { useRouter } from "next/navigation";
+import { supabase } from "@/lib/supabaseClient"; // 👈 asegúrate de tener este import correcto
 
 export default function RecompensasPage() {
+  const router = useRouter();
+
   const [points, setPoints] = useState<number>(0);
   const [visitedSections, setVisitedSections] = useState<Set<string>>(new Set());
   const [showCertificate, setShowCertificate] = useState<boolean>(false);
   const [certificateShown, setCertificateShown] = useState<boolean>(false);
+  const [userName, setUserName] = useState<string>("Usuario Distinguido");
 
   const sections = [
-    { 
-      id: 'cafeterias', 
-      name: 'Cafeterías', 
-      icon: '☕', 
-      description: 'Descubre las mejores cafeterías de la ciudad'
-    },
-    { 
-      id: 'comentarios', 
-      name: 'Comentarios', 
-      icon: '💬', 
-      description: 'Comparte tu experiencia y lee opiniones'
-    }
+    { id: 'cafeterias', name: 'Cafeterías', icon: '☕', description: 'Descubre las mejores cafeterías de la ciudad' },
+    { id: 'comentarios', name: 'Comentarios', icon: '💬', description: 'Comparte tu experiencia y lee opiniones' }
   ];
 
   const pointsPerSection = 20;
   const totalPoints = sections.length * pointsPerSection;
 
-  // Marcar sección como visitada
+  // ✅ Obtener usuario logueado
+  useEffect(() => {
+    const fetchUser = async () => {
+      const { data, error } = await supabase.auth.getUser();
+      if (data?.user) {
+        const name = data.user.user_metadata?.name || data.user.email || "Usuario Distinguido";
+        setUserName(name);
+      }
+    };
+    fetchUser();
+  }, []);
+
+  // ✅ Cargar progreso guardado
+  useEffect(() => {
+    const savedPoints = localStorage.getItem('points');
+    const savedVisited = localStorage.getItem('visitedSections');
+    if (savedPoints) setPoints(parseInt(savedPoints));
+    if (savedVisited) setVisitedSections(new Set(JSON.parse(savedVisited)));
+  }, []);
+
+  // ✅ Guardar progreso
+  useEffect(() => {
+    localStorage.setItem('points', points.toString());
+    localStorage.setItem('visitedSections', JSON.stringify(Array.from(visitedSections)));
+  }, [points, visitedSections]);
+
+  // ✅ Marcar sección + redirigir
   const markSectionVisited = (sectionId: string) => {
     if (!visitedSections.has(sectionId)) {
       const newVisited = new Set(visitedSections);
@@ -34,12 +55,14 @@ export default function RecompensasPage() {
       setVisitedSections(newVisited);
       setPoints(points + pointsPerSection);
     }
+
+    if (sectionId === "cafeterias") router.push("/cafeterias");
+    else if (sectionId === "comentarios") router.push("/comentarios");
   };
 
   const progress = (points / totalPoints) * 100;
   const isComplete = points >= totalPoints;
 
-  // Mostrar certificado cuando se complete
   useEffect(() => {
     if (isComplete && !certificateShown && !showCertificate) {
       setTimeout(() => {
@@ -49,6 +72,7 @@ export default function RecompensasPage() {
     }
   }, [isComplete, certificateShown, showCertificate]);
 
+  // ✅ Certificado con nombre personalizado
   const downloadCertificate = () => {
     const canvas = document.createElement('canvas');
     canvas.width = 800;
@@ -61,7 +85,7 @@ export default function RecompensasPage() {
     ctx.fillStyle = '#fef3c7';
     ctx.fillRect(0, 0, 800, 600);
 
-    // Borde marrón
+    // Borde
     ctx.fillStyle = '#92400e';
     ctx.fillRect(20, 20, 760, 560);
     ctx.fillStyle = '#fef3c7';
@@ -81,8 +105,9 @@ export default function RecompensasPage() {
     ctx.fillStyle = '#78350f';
     ctx.fillText('Este certificado se otorga a:', 400, 260);
 
+    // 👇 Aquí se muestra el nombre del usuario Supabase
     ctx.font = 'italic 32px serif';
-    ctx.fillText('Usuario Distinguido', 400, 320);
+    ctx.fillText(userName, 400, 320);
 
     ctx.font = '20px sans-serif';
     ctx.fillText('Por completar exitosamente la exploración', 400, 380);
@@ -97,7 +122,6 @@ export default function RecompensasPage() {
     const date = new Date().toLocaleDateString('es-ES');
     ctx.fillText(`Fecha: ${date}`, 400, 530);
 
-    // Descargar
     const link = document.createElement('a');
     link.download = 'certificado-explorador-cafetero.png';
     link.href = canvas.toDataURL();
@@ -110,6 +134,8 @@ export default function RecompensasPage() {
       setVisitedSections(new Set());
       setShowCertificate(false);
       setCertificateShown(false);
+      localStorage.removeItem('points');
+      localStorage.removeItem('visitedSections');
     }
   };
 
@@ -130,7 +156,7 @@ export default function RecompensasPage() {
               Reiniciar
             </button>
           </div>
-          
+
           {/* Barra de progreso */}
           <div className="bg-gray-700 rounded-full h-6 overflow-hidden mb-2">
             <div 
@@ -146,7 +172,7 @@ export default function RecompensasPage() {
         </div>
       </div>
 
-      {/* Contenido principal */}
+      {/* Secciones */}
       <div className="max-w-6xl mx-auto px-4 py-16">
         <div className="text-center mb-16">
           <div className="text-8xl mb-6">🏆</div>
@@ -161,7 +187,6 @@ export default function RecompensasPage() {
           </div>
         </div>
 
-        {/* Tarjetas de secciones */}
         <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
           {sections.map(section => {
             const isVisited = visitedSections.has(section.id);
@@ -201,59 +226,36 @@ export default function RecompensasPage() {
             );
           })}
         </div>
-
-        {/* Mensaje de progreso */}
-        {points > 0 && !isComplete && (
-          <div className="mt-16 text-center">
-            <div className="inline-block bg-gray-100 border-2 border-gray-300 rounded-lg p-6">
-              <p className="text-xl text-gray-800">
-                ¡Sigue así! Te faltan <span className="font-bold text-yellow-600">{totalPoints - points} puntos</span> para tu certificado
-              </p>
-            </div>
-          </div>
-        )}
       </div>
 
-      {/* Modal del certificado */}
+      {/* Modal certificado */}
       {showCertificate && (
         <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg shadow-2xl max-w-2xl w-full p-10 border-4 border-yellow-400">
-            <div className="text-center">
-              <div className="text-8xl mb-6">🏆</div>
-              <h2 className="text-5xl font-bold text-gray-900 mb-4 uppercase">
-                ¡Felicitaciones!
-              </h2>
-              <p className="text-xl text-gray-700 mb-8">
-                Has completado todas las secciones y ganado {totalPoints} puntos
-              </p>
-              
-              <div className="bg-gray-50 rounded-lg p-8 mb-8 border-2 border-gray-200">
-                <h3 className="text-3xl font-bold text-gray-900 mb-3 uppercase">
-                  Certificado de Explorador Cafetero
-                </h3>
-                <p className="text-gray-700 text-lg">
-                  Has demostrado ser un verdadero amante del café
-                </p>
-              </div>
+          <div className="bg-white rounded-lg shadow-2xl max-w-2xl w-full p-10 border-4 border-yellow-400 text-center">
+            <div className="text-8xl mb-6">🏆</div>
+            <h2 className="text-5xl font-bold text-gray-900 mb-4 uppercase">
+              ¡Felicitaciones!
+            </h2>
+            <p className="text-xl text-gray-700 mb-4">
+              Has completado todas las secciones y ganado {totalPoints} puntos
+            </p>
+            <p className="text-lg text-gray-800 mb-8">
+              Este certificado pertenece a <strong>{userName}</strong>
+            </p>
 
-              <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <button
-                  onClick={downloadCertificate}
-                  className="bg-yellow-400 hover:bg-yellow-500 text-gray-900 font-bold py-4 px-8 rounded uppercase transition text-lg"
-                >
-                  📥 Descargar Certificado
-                </button>
-                <button
-                  onClick={() => setShowCertificate(false)}
-                  className="bg-gray-200 hover:bg-gray-300 text-gray-900 font-bold py-4 px-8 rounded uppercase transition text-lg"
-                >
-                  Cerrar
-                </button>
-              </div>
-
-              <p className="text-sm text-gray-600 mt-6">
-                Puedes volver a ver tu certificado reiniciando y completando nuevamente
-              </p>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <button
+                onClick={downloadCertificate}
+                className="bg-yellow-400 hover:bg-yellow-500 text-gray-900 font-bold py-4 px-8 rounded uppercase transition text-lg"
+              >
+                📥 Descargar Certificado
+              </button>
+              <button
+                onClick={() => setShowCertificate(false)}
+                className="bg-gray-200 hover:bg-gray-300 text-gray-900 font-bold py-4 px-8 rounded uppercase transition text-lg"
+              >
+                Cerrar
+              </button>
             </div>
           </div>
         </div>

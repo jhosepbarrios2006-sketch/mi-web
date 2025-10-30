@@ -1,6 +1,4 @@
 "use client";
-
-import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import HistorySection from "../components/HistorySection";
@@ -10,13 +8,6 @@ import PromotionsSection from "../components/PromotionsSection";
 
 export default function HomePage() {
   const router = useRouter();
-
-  // 🔁 Redirigir automáticamente al entrar en "/"
-  useEffect(() => {
-    if (window.location.pathname === "/") {
-      router.push("/inicio");
-    }
-  }, [router]);
 
   return (
     <main className="flex flex-col items-center min-h-screen bg-[var(--background)] text-[var(--foreground)] font-[var(--font-sans)]">
@@ -47,17 +38,18 @@ export default function HomePage() {
               VER CAFETERÍAS
             </button>
 
-            {/* 🔹 NUEVO BOTÓN DE RECOMPENSAS */}
-            <button
-              onClick={() => router.push("/recompensas")}
-              className="hero-btn bg-yellow-500 text-black px-6 py-3 rounded-lg hover:bg-yellow-400 transition-colors"
-            >
-              MIS RECOMPENSAS 🎁
-            </button>
-          </div>
-          <p className="mt-4 text-lg text-yellow-100 drop-shadow-md"></p>
-        </div>
-      </motion.section>
+      {/* 🔹 NUEVO BOTÓN DE RECOMPENSAS */}
+      <button
+        onClick={() => router.push("/recompensas")}
+        className="hero-btn bg-yellow-500 text-black px-6 py-3 rounded-lg hover:bg-yellow-400 transition-colors"
+      >
+        MIS RECOMPENSAS 🎁
+             </button>
+         </div>
+             <p className="mt-4 text-lg text-yellow-100 drop-shadow-md">
+             </p>
+         </div>
+    </motion.section>
 
       {/* 🏞️ HISTORIA DE FUSAGASUGÁ */}
       <motion.div
