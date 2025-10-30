@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabaseClient";
 import { useRouter } from "next/navigation";
 
@@ -10,14 +10,28 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
 
+  // ✅ Mantener sesión activa (importante para que no se cierre al recargar)
+  useEffect(() => {
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange(async (event, session) => {
+      if (session) {
+        console.log("✅ Sesión activa detectada");
+        router.push("/"); // Redirigir automáticamente al inicio
+      }
+    });
+    return () => subscription.unsubscribe();
+  }, [router]);
+
   const handleLogin = async () => {
     setLoading(true);
 
     // 🔐 Iniciar sesión
-    const { data: loginData, error: loginError } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
+    const { data: loginData, error: loginError } =
+      await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
 
     if (loginError) {
       alert("❌ " + loginError.message);
@@ -25,8 +39,10 @@ export default function LoginPage() {
       return;
     }
 
-    const { data: { user } } = await supabase.auth.getUser();
-    console.log("✅ Usuario autenticado:", user);
+    // 🔎 Obtener el usuario actual
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
 
     if (!user) {
       alert("❌ No se pudo obtener el usuario después del login");
@@ -34,19 +50,16 @@ export default function LoginPage() {
       return;
     }
 
-    // 🔎 Buscar rol en la tabla 'usuarios'
+    // 🔍 Buscar el rol en la tabla `usuarios`
     const { data: userData, error: roleError } = await supabase
       .from("usuarios")
       .select("rol")
       .eq("email", user.email)
       .maybeSingle();
 
-    console.log("🧩 userData:", userData);
-    console.log("🧩 roleError:", roleError);
-
     if (roleError) {
-      alert("⚠️ Error al obtener rol del usuario");
-      console.error("Error al obtener rol:", roleError);
+      alert("⚠️ Error al obtener el rol del usuario");
+      console.error(roleError);
       setLoading(false);
       return;
     }
@@ -57,7 +70,7 @@ export default function LoginPage() {
       router.push("/admin");
     } else {
       alert("Login exitoso 🎉");
-      router.push("/cafeterias");
+      router.push("/"); // Redirige al inicio
     }
 
     setLoading(false);
@@ -65,7 +78,7 @@ export default function LoginPage() {
 
   const handleGuest = () => {
     alert("Entraste como invitado 🚀");
-    router.push("/cafeterias");
+    router.push("/");
   };
 
   return (

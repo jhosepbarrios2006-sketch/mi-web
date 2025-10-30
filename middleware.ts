@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 
-// 🔧 Configura tu cliente de Supabase (usa variables del entorno)
+// ⚙️ Cliente de Supabase
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
@@ -10,28 +10,40 @@ const supabase = createClient(
 
 export async function middleware(req: NextRequest) {
   const token = req.cookies.get("sb-access-token")?.value;
+  const path = req.nextUrl.pathname;
 
-  // 🚫 Si no hay sesión, redirigir al login
-  if (!token) {
+  // 🚫 Si no hay token e intenta acceder a /admin, redirigir al login
+  if (!token && path.startsWith("/admin")) {
     console.log("🚫 No hay token, redirigiendo a /login");
     return NextResponse.redirect(new URL("/login", req.url));
   }
 
+  // ⚡ Si no hay token, dejar pasar (para /, /login, etc.)
+  if (!token) {
+    return NextResponse.next();
+  }
+
   try {
-    // 🔍 Verificamos el usuario autenticado
+    // 🔍 Verificar usuario
     const {
       data: { user },
       error,
     } = await supabase.auth.getUser(token);
 
     if (error || !user) {
-      console.log("⚠️ Usuario no autenticado o error:", error);
+      console.log("⚠️ Usuario no autenticado:", error);
       return NextResponse.redirect(new URL("/login", req.url));
     }
 
     console.log("✅ Usuario autenticado:", user.email);
 
-    // 🧭 Verificamos el rol en la tabla `usuarios`
+    // 🔁 Si el usuario ya está logueado e intenta ir a /login → redirigir al inicio
+    if (path === "/login") {
+      console.log("🔁 Usuario autenticado, redirigiendo a /");
+      return NextResponse.redirect(new URL("/", req.url));
+    }
+
+    // 🧭 Consultar rol del usuario
     const { data: usuario, error: rolError } = await supabase
       .from("usuarios")
       .select("rol")
@@ -45,15 +57,12 @@ export async function middleware(req: NextRequest) {
 
     console.log("👤 Rol del usuario:", usuario?.rol);
 
-    const path = req.nextUrl.pathname;
-
-    // 🛑 Si no es admin y trata de entrar a /admin, lo redirigimos
+    // 🔒 Solo permitir admin en /admin
     if (path.startsWith("/admin") && usuario?.rol !== "admin") {
       console.warn("⛔ Acceso denegado: no es admin");
-      return NextResponse.redirect(new URL("/cafeterias", req.url));
+      return NextResponse.redirect(new URL("/", req.url)); // 👉 redirige al inicio
     }
 
-    // ✅ Si pasa todo, continúa
     return NextResponse.next();
   } catch (err) {
     console.error("💥 Error en middleware:", err);
@@ -61,9 +70,7 @@ export async function middleware(req: NextRequest) {
   }
 }
 
-// ⚙️ Define las rutas protegidas
+// ⚙️ Solo afecta rutas necesarias
 export const config = {
-  matcher: ["/admin/:path*"], // solo protege /admin
+  matcher: ["/admin/:path*", "/login"],
 };
-
-
