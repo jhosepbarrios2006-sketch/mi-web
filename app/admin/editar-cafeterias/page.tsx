@@ -4,7 +4,6 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabaseClient";
 import { useRouter } from "next/navigation";
 
-// 🧩 Definimos el tipo de dato Cafeteria
 interface Cafeteria {
   id: string;
   nombre: string;
@@ -15,8 +14,6 @@ interface Cafeteria {
 
 export default function EditarCafeteriasPage() {
   const router = useRouter();
-
-  // 📦 Tipamos los estados
   const [cafeterias, setCafeterias] = useState<Cafeteria[]>([]);
   const [editando, setEditando] = useState<string | null>(null);
   const [formData, setFormData] = useState<Omit<Cafeteria, "id">>({
@@ -26,65 +23,50 @@ export default function EditarCafeteriasPage() {
     horario: "",
   });
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [mensaje, setMensaje] = useState<string | null>(null);
 
-  // 📦 Cargar cafeterías existentes
+  // 🔍 Cargar cafeterías
   const cargarCafeterias = async () => {
-    try {
-      const { data, error } = await supabase
-        .from("cafeterias")
-        .select("*")
-        .order("nombre", { ascending: true });
+    const { data, error } = await supabase
+      .from("cafeterias")
+      .select("*")
+      .order("nombre", { ascending: true });
 
-      if (error) throw error;
-      
-      if (data) {
-        setCafeterias(data as Cafeteria[]);
-      }
-    } catch (err) {
-      console.error("Error cargando cafeterías:", err);
-      setError("Error al cargar las cafeterías");
+    if (error) {
+      console.error("❌ Error cargando cafeterías:", error);
+      setMensaje("Error al cargar las cafeterías");
+      return;
     }
+
+    setCafeterias(data || []);
   };
 
-  // 🧠 Verificar que el usuario sea admin
+  // 🧠 Verificar sesión y rol
   useEffect(() => {
     const verificarRol = async () => {
-      try {
-        const {
-          data: { user },
-          error: userError,
-        } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
 
-        if (userError) throw userError;
-
-        if (!user) {
-          router.push("/login");
-          return;
-        }
-
-        const { data: userData, error: roleError } = await supabase
-          .from("usuarios")
-          .select("rol")
-          .eq("email", user.email)
-          .maybeSingle();
-
-        if (roleError) throw roleError;
-
-        if (userData?.rol !== "admin") {
-          alert("⚠️ No tienes permiso para acceder aquí");
-          router.push("/");
-          return;
-        }
-
-        await cargarCafeterias();
-      } catch (err) {
-        console.error("Error verificando rol:", err);
-        setError("Error al verificar permisos");
-        router.push("/");
-      } finally {
-        setLoading(false);
+      if (!user) {
+        router.push("/login");
+        return;
       }
+
+      const { data: userData } = await supabase
+        .from("usuarios")
+        .select("rol")
+        .eq("email", user.email)
+        .maybeSingle();
+
+      if (userData?.rol !== "admin") {
+        alert("🚫 No tienes permiso para acceder aquí.");
+        router.push("/");
+        return;
+      }
+
+      await cargarCafeterias();
+      setLoading(false);
     };
 
     verificarRol();
@@ -115,42 +97,38 @@ export default function EditarCafeteriasPage() {
   // 💾 Guardar cambios
   const guardarCambios = async () => {
     if (!editando) return;
-
-    // Validación básica
     if (!formData.nombre.trim()) {
       alert("⚠️ El nombre es obligatorio");
       return;
     }
 
-    try {
-      const { error } = await supabase
-        .from("cafeterias")
-        .update(formData)
-        .eq("id", editando);
+    const { error } = await supabase
+      .from("cafeterias")
+      .update(formData)
+      .eq("id", editando);
 
-      if (error) throw error;
-
-      alert("✅ Cambios guardados correctamente");
-      cancelarEdicion();
-      await cargarCafeterias();
-    } catch (err) {
-      console.error("Error al guardar:", err);
-      alert("❌ Error al guardar cambios");
+    if (error) {
+      console.error("❌ Error al guardar:", error);
+      setMensaje("Error al guardar los cambios");
+      return;
     }
+
+    // 🔄 Actualizar en tiempo real sin recargar
+    setCafeterias((prev) =>
+      prev.map((c) => (c.id === editando ? { ...c, ...formData } : c))
+    );
+
+    setMensaje("✅ Cambios guardados correctamente");
+    cancelarEdicion();
+
+    setTimeout(() => setMensaje(null), 2500);
   };
 
+  // ⏳ Loading
   if (loading) {
     return (
       <div className="p-6 text-center">
-        <p className="text-lg">Cargando...</p>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="p-6 text-center">
-        <p className="text-red-600 text-lg">{error}</p>
+        <p className="text-lg text-gray-600">Cargando cafeterías...</p>
       </div>
     );
   }
@@ -160,6 +138,10 @@ export default function EditarCafeteriasPage() {
       <h1 className="text-3xl font-bold text-[#b08968] text-center">
         ☕ Editar Cafeterías
       </h1>
+
+      {mensaje && (
+        <p className="text-center text-green-600 font-medium">{mensaje}</p>
+      )}
 
       {cafeterias.length === 0 ? (
         <p className="text-center text-gray-500">
@@ -179,16 +161,15 @@ export default function EditarCafeteriasPage() {
                   onChange={(e) =>
                     setFormData({ ...formData, nombre: e.target.value })
                   }
-                  className="w-full border p-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#b08968]"
+                  className="w-full border p-2 rounded-lg focus:ring-2 focus:ring-[#b08968]"
                   placeholder="Nombre *"
-                  required
                 />
                 <textarea
                   value={formData.descripcion}
                   onChange={(e) =>
                     setFormData({ ...formData, descripcion: e.target.value })
                   }
-                  className="w-full border p-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#b08968]"
+                  className="w-full border p-2 rounded-lg focus:ring-2 focus:ring-[#b08968]"
                   placeholder="Descripción"
                   rows={3}
                 />
@@ -198,7 +179,7 @@ export default function EditarCafeteriasPage() {
                   onChange={(e) =>
                     setFormData({ ...formData, ubicacion: e.target.value })
                   }
-                  className="w-full border p-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#b08968]"
+                  className="w-full border p-2 rounded-lg focus:ring-2 focus:ring-[#b08968]"
                   placeholder="Ubicación"
                 />
                 <input
@@ -207,19 +188,19 @@ export default function EditarCafeteriasPage() {
                   onChange={(e) =>
                     setFormData({ ...formData, horario: e.target.value })
                   }
-                  className="w-full border p-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#b08968]"
+                  className="w-full border p-2 rounded-lg focus:ring-2 focus:ring-[#b08968]"
                   placeholder="Horario"
                 />
-                <div className="flex gap-2 mt-2">
+                <div className="flex gap-2 mt-3">
                   <button
                     onClick={guardarCambios}
-                    className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded transition-colors"
+                    className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition-colors"
                   >
                     💾 Guardar
                   </button>
                   <button
                     onClick={cancelarEdicion}
-                    className="bg-gray-400 hover:bg-gray-500 text-white px-4 py-2 rounded transition-colors"
+                    className="bg-gray-400 hover:bg-gray-500 text-white px-4 py-2 rounded-lg transition-colors"
                   >
                     ❌ Cancelar
                   </button>
@@ -227,15 +208,19 @@ export default function EditarCafeteriasPage() {
               </>
             ) : (
               <>
-                <h2 className="font-bold text-xl text-[#b08968]">{caf.nombre}</h2>
+                <h2 className="font-bold text-xl text-[#b08968]">
+                  {caf.nombre}
+                </h2>
                 {caf.descripcion && (
                   <p className="text-gray-600">{caf.descripcion}</p>
                 )}
-                {caf.ubicacion && <p className="text-sm">📍 {caf.ubicacion}</p>}
+                {caf.ubicacion && (
+                  <p className="text-sm">📍 {caf.ubicacion}</p>
+                )}
                 {caf.horario && <p className="text-sm">🕒 {caf.horario}</p>}
                 <button
                   onClick={() => editarCafeteria(caf)}
-                  className="mt-2 bg-[#b08968] hover:bg-[#a06f4a] text-white px-4 py-2 rounded transition-colors"
+                  className="mt-2 bg-[#b08968] hover:bg-[#a06f4a] text-white px-4 py-2 rounded-lg transition-colors"
                 >
                   ✏️ Editar
                 </button>
