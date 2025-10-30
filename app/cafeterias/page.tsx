@@ -19,7 +19,9 @@ export default function CafeteriasPage() {
   // 🧠 Obtener usuario y rol
   useEffect(() => {
     const fetchUserAndRole = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
       const currentUser = session?.user || null;
       setUser(currentUser);
 
@@ -36,9 +38,11 @@ export default function CafeteriasPage() {
 
     fetchUserAndRole();
 
-    const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user || null);
-    });
+    const { data: listener } = supabase.auth.onAuthStateChange(
+      (_event, session) => {
+        setUser(session?.user || null);
+      }
+    );
 
     return () => listener.subscription.unsubscribe();
   }, []);
@@ -94,7 +98,7 @@ export default function CafeteriasPage() {
         {rol === "admin" && (
           <div className="flex justify-center mb-10">
             <Link
-              href="/editar-cafeterias"
+              href="/admin/editar-cafeterias"
               className="bg-yellow-600 hover:bg-yellow-700 text-white px-6 py-3 rounded-xl font-semibold shadow-lg transition-all"
             >
               ✏️ Editar Cafeterías
