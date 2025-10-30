@@ -23,9 +23,9 @@ export default function LoginPage() {
       return;
     }
 
-    // ✅ Buscar el rol del usuario en la tabla 'users'
+    // ✅ Buscar el rol del usuario en la tabla 'usuarios'
     const { data: userData, error: roleError } = await supabase
-      .from("users")
+      .from("usuarios")
       .select("role")
       .eq("email", email)
       .single();
