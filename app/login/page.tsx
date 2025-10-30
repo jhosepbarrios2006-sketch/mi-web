@@ -1,4 +1,5 @@
 "use client";
+
 import { useState } from "react";
 import { supabase } from "@/lib/supabaseClient";
 import { useRouter } from "next/navigation";
@@ -13,29 +14,38 @@ export default function LoginPage() {
     setLoading(true);
 
     // 🔐 Iniciar sesión con Supabase Auth
-    const { error } = await supabase.auth.signInWithPassword({
+    const { data: loginData, error: loginError } = await supabase.auth.signInWithPassword({
       email,
       password,
     });
 
-    if (error) {
-      alert("❌ " + error.message);
+    if (loginError) {
+      alert("❌ " + loginError.message);
       setLoading(false);
       return;
     }
 
-    // ✅ Buscar el rol en la tabla 'usuarios'
+    const user = loginData.user;
+    console.log("✅ Usuario autenticado:", user);
+
+    if (!user) {
+      alert("❌ No se pudo obtener el usuario después del login");
+      setLoading(false);
+      return;
+    }
+
+    // 🔎 Buscar el rol del usuario en la tabla 'usuarios' usando su UUID
     const { data: userData, error: roleError } = await supabase
       .from("usuarios")
-      .select("rol") // 👈 CAMBIADO
-      .eq("email", email)
+      .select("rol")
+      .eq("uuid", user.id) // 👈 Importante: usamos el UID del sistema de autenticación
       .single();
 
-      console.log("🔎 Resultado de búsqueda de usuario:", userData, roleError);
-      
+    console.log("🧭 Resultado de búsqueda de usuario:", userData, roleError);
+
     if (roleError || !userData) {
       alert("⚠️ No se pudo obtener el rol del usuario");
-      console.error(roleError);
+      console.error("Error al obtener rol:", roleError);
       setLoading(false);
       return;
     }
@@ -43,10 +53,10 @@ export default function LoginPage() {
     // ✅ Redirigir según el rol
     if (userData.rol === "admin") {
       alert("Bienvenido administrador 👑");
-      router.push("/admin"); // asegúrate de tener esta ruta creada
+      router.push("/admin");
     } else {
       alert("Login exitoso 🎉");
-      router.push("/cafeterias"); // o la ruta que prefieras para usuarios normales
+      router.push("/cafeterias");
     }
 
     setLoading(false);
