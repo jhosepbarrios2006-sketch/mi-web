@@ -44,6 +44,14 @@ export default function LoginPage() {
 
     console.log("🧭 Resultado de búsqueda de usuario:", userData, roleError);
 
+        if (!userData) {
+    console.warn("⚠️ No se encontró un usuario con ese correo:", user.email);
+    alert("No se encontró tu rol. Verifica que estés registrado correctamente.");
+    setLoading(false);
+    return;
+}
+
+
     if (roleError || !userData) {
       alert("⚠️ No se pudo obtener el rol del usuario");
       console.error("Error al obtener rol:", roleError);
