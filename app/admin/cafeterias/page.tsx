@@ -4,11 +4,22 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabaseClient";
 import { useRouter } from "next/navigation";
 
+// 🧩 Definimos el tipo de dato Cafeteria
+interface Cafeteria {
+  id: string;
+  nombre: string;
+  descripcion?: string;
+  ubicacion?: string;
+  horario?: string;
+}
+
 export default function EditarCafeteriasPage() {
   const router = useRouter();
-  const [cafeterias, setCafeterias] = useState([]);
-  const [editando, setEditando] = useState(null);
-  const [formData, setFormData] = useState({
+
+  // 📦 Tipamos los estados
+  const [cafeterias, setCafeterias] = useState<Cafeteria[]>([]);
+  const [editando, setEditando] = useState<string | null>(null);
+  const [formData, setFormData] = useState<Omit<Cafeteria, "id">>({
     nombre: "",
     descripcion: "",
     ubicacion: "",
@@ -56,13 +67,13 @@ export default function EditarCafeteriasPage() {
 
     if (error) {
       console.error("Error cargando cafeterías:", error);
-    } else {
-      setCafeterias(data);
+    } else if (data) {
+      setCafeterias(data as Cafeteria[]);
     }
   };
 
   // ✏️ Iniciar edición
-  const editarCafeteria = (caf) => {
+  const editarCafeteria = (caf: Cafeteria) => {
     setEditando(caf.id);
     setFormData({
       nombre: caf.nombre || "",
@@ -74,14 +85,11 @@ export default function EditarCafeteriasPage() {
 
   // 💾 Guardar cambios
   const guardarCambios = async () => {
+    if (!editando) return;
+
     const { error } = await supabase
       .from("cafeterias")
-      .update({
-        nombre: formData.nombre,
-        descripcion: formData.descripcion,
-        ubicacion: formData.ubicacion,
-        horario: formData.horario,
-      })
+      .update(formData)
       .eq("id", editando);
 
     if (error) {
