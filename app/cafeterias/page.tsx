@@ -22,6 +22,7 @@ export default function CafeteriasPage() {
       const {
         data: { session },
       } = await supabase.auth.getSession();
+
       const currentUser = session?.user || null;
       setUser(currentUser);
 
@@ -47,12 +48,12 @@ export default function CafeteriasPage() {
     return () => listener.subscription.unsubscribe();
   }, []);
 
-  // ☕ Cargar cafeterías
+  // ☕ Cargar cafeterías desde Supabase
   useEffect(() => {
     const fetchCafes = async () => {
       const { data, error } = await supabase.from("cafeterias").select("*");
       if (error) console.error("❌ Error al cargar cafeterías:", error);
-      else setCafes(data);
+      else setCafes(data || []);
       setLoading(false);
     };
     fetchCafes();
@@ -63,6 +64,7 @@ export default function CafeteriasPage() {
     router.push("/#mapaHome");
   };
 
+  // 🌀 Cargando...
   if (loading)
     return (
       <div
@@ -94,7 +96,7 @@ export default function CafeteriasPage() {
           ☕ Directorio de Cafeterías con Descuentos
         </h1>
 
-        {/* 🔒 Solo el admin ve este botón */}
+        {/* 🔒 Botón visible solo para admin */}
         {rol === "admin" && (
           <div className="flex justify-center mb-10">
             <Link
@@ -124,6 +126,7 @@ export default function CafeteriasPage() {
                   className="h-52 w-full object-cover rounded-t-2xl"
                 />
               )}
+
               <div className="p-6 text-left flex flex-col items-center">
                 <h2 className="text-2xl font-semibold text-[#4b2e16] mb-2 text-center">
                   {cafe.nombre}
@@ -135,7 +138,7 @@ export default function CafeteriasPage() {
                   📍 {cafe.direccion || cafe.ubicacion}
                 </p>
 
-                {/* Botón para ver en mapa */}
+                {/* Botón para ver en el mapa */}
                 <button
                   onClick={goToMapa}
                   className="mt-2 text-yellow-500 underline text-sm"
@@ -143,7 +146,7 @@ export default function CafeteriasPage() {
                   Ver en el mapa
                 </button>
 
-                {/* Mostrar QR solo si el usuario está logueado */}
+                {/* Mostrar QR si el usuario está logueado */}
                 {user ? (
                   <>
                     <div className="mt-5 bg-white p-2 rounded-lg">
@@ -169,6 +172,7 @@ export default function CafeteriasPage() {
           ))}
         </div>
 
+        {/* 🪶 Si no hay cafeterías */}
         {cafes.length === 0 && (
           <p className="text-center mt-10 text-white font-medium drop-shadow-md">
             No hay cafeterías registradas todavía ☕

@@ -12,19 +12,19 @@ export async function middleware(req: NextRequest) {
   const token = req.cookies.get("sb-access-token")?.value;
   const path = req.nextUrl.pathname;
 
-  // 🚫 Si no hay token e intenta acceder a /admin, redirigir al login
+  // 🚫 Si no hay token e intenta acceder a /admin → redirigir al login
   if (!token && path.startsWith("/admin")) {
     console.log("🚫 No hay token, redirigiendo a /login");
     return NextResponse.redirect(new URL("/login", req.url));
   }
 
-  // ⚡ Si no hay token, dejar pasar (para /, /login, etc.)
+  // ⚡ Si no hay token, dejar pasar (para rutas públicas como /, /login, etc.)
   if (!token) {
     return NextResponse.next();
   }
 
   try {
-    // 🔍 Verificar usuario
+    // 🔍 Verificar usuario autenticado
     const {
       data: { user },
       error,
@@ -37,7 +37,7 @@ export async function middleware(req: NextRequest) {
 
     console.log("✅ Usuario autenticado:", user.email);
 
-    // 🔁 Si el usuario ya está logueado e intenta ir a /login → redirigir al inicio
+    // 🔁 Si el usuario autenticado intenta ir a /login → redirigir al inicio
     if (path === "/login") {
       console.log("🔁 Usuario autenticado, redirigiendo a /");
       return NextResponse.redirect(new URL("/", req.url));
@@ -57,12 +57,13 @@ export async function middleware(req: NextRequest) {
 
     console.log("👤 Rol del usuario:", usuario?.rol);
 
-    // 🔒 Solo permitir admin en /admin
+    // 🔒 Solo permitir admin en rutas /admin/*
     if (path.startsWith("/admin") && usuario?.rol !== "admin") {
       console.warn("⛔ Acceso denegado: no es admin");
-      return NextResponse.redirect(new URL("/", req.url)); // 👉 redirige al inicio
+      return NextResponse.redirect(new URL("/", req.url));
     }
 
+    // ✅ Si todo bien → continuar
     return NextResponse.next();
   } catch (err) {
     console.error("💥 Error en middleware:", err);
