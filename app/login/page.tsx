@@ -1,33 +1,65 @@
-"use client"
-import { useState } from "react"
-import { supabase } from "@/lib/supabaseClient"
-import { useRouter } from "next/navigation"
+"use client";
+import { useState } from "react";
+import { supabase } from "@/lib/supabaseClient";
+import { useRouter } from "next/navigation";
 
 export default function LoginPage() {
-  const router = useRouter()
-  const [email, setEmail] = useState("")
-  const [password, setPassword] = useState("")
+  const router = useRouter();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const handleLogin = async () => {
-    const { error } = await supabase.auth.signInWithPassword({ email, password })
+    setLoading(true);
+
+    const { data: sessionData, error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+
     if (error) {
-      alert(error.message)
-    } else {
-      alert("Login exitoso 🎉")
-      router.push("/")
+      alert("❌ " + error.message);
+      setLoading(false);
+      return;
     }
-  }
+
+    // ✅ Buscar el rol del usuario en la tabla 'users'
+    const { data: userData, error: roleError } = await supabase
+      .from("users")
+      .select("role")
+      .eq("email", email)
+      .single();
+
+    if (roleError) {
+      alert("⚠️ No se pudo obtener el rol del usuario");
+      setLoading(false);
+      return;
+    }
+
+    // ✅ Redirigir según el rol
+    if (userData?.role === "admin") {
+      alert("Bienvenido administrador 👑");
+      router.push("/admin");
+    } else {
+      alert("Login exitoso 🎉");
+      router.push("/cafeterias");
+    }
+
+    setLoading(false);
+  };
 
   const handleGuest = () => {
-    alert("Entraste como invitado 🚀")
-    router.push("/")
-  }
+    alert("Entraste como invitado 🚀");
+    router.push("/cafeterias");
+  };
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-[#f4ede4] to-[#e1c6b2] p-4">
       <div className="bg-white rounded-2xl shadow-xl w-full max-w-md p-8 space-y-6">
         {/* 🔐 Título */}
-        <h1 className="text-3xl font-bold text-[#b08968] text-center">🔒 Ingresar</h1>
+        <h1 className="text-3xl font-bold text-[#b08968] text-center">
+          🔒 Ingresar
+        </h1>
 
         {/* 📧 Campo de correo */}
         <input
@@ -50,9 +82,12 @@ export default function LoginPage() {
         {/* 🧡 Botón principal */}
         <button
           onClick={handleLogin}
-          className="w-full bg-[#b08968] hover:bg-[#a06f4a] text-white font-semibold py-3 rounded-lg transition"
+          disabled={loading}
+          className={`w-full ${
+            loading ? "bg-gray-400" : "bg-[#b08968] hover:bg-[#a06f4a]"
+          } text-white font-semibold py-3 rounded-lg transition`}
         >
-          Iniciar Sesión
+          {loading ? "Ingresando..." : "Iniciar Sesión"}
         </button>
 
         {/* 🚀 Invitado */}
@@ -75,5 +110,5 @@ export default function LoginPage() {
         </p>
       </div>
     </div>
-  )
+  );
 }
