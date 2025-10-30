@@ -13,7 +13,7 @@ export default function LoginPage() {
   const handleLogin = async () => {
     setLoading(true);
 
-    // 🔐 Iniciar sesión con Supabase Auth
+    // 🔐 Iniciar sesión
     const { data: loginData, error: loginError } = await supabase.auth.signInWithPassword({
       email,
       password,
@@ -25,9 +25,8 @@ export default function LoginPage() {
       return;
     }
 
-   const { data: { user } } = await supabase.auth.getUser();
+    const { data: { user } } = await supabase.auth.getUser();
     console.log("✅ Usuario autenticado:", user);
-
 
     if (!user) {
       alert("❌ No se pudo obtener el usuario después del login");
@@ -35,32 +34,25 @@ export default function LoginPage() {
       return;
     }
 
-    // 🔎 Buscar el rol del usuario en la tabla 'usuarios' usando su UUID
+    // 🔎 Buscar rol en la tabla 'usuarios'
     const { data: userData, error: roleError } = await supabase
       .from("usuarios")
       .select("rol")
-      .eq("email", user.email) // 👈 Importante: usamos el UID del sistema de autenticación
-      .single();
+      .eq("email", user.email)
+      .maybeSingle();
 
-    console.log("🧭 Resultado de búsqueda de usuario:", userData, roleError);
+    console.log("🧩 userData:", userData);
+    console.log("🧩 roleError:", roleError);
 
-        if (!userData) {
-    console.warn("⚠️ No se encontró un usuario con ese correo:", user.email);
-    alert("No se encontró tu rol. Verifica que estés registrado correctamente.");
-    setLoading(false);
-    return;
-}
-
-
-    if (roleError || !userData) {
-      alert("⚠️ No se pudo obtener el rol del usuario");
+    if (roleError) {
+      alert("⚠️ Error al obtener rol del usuario");
       console.error("Error al obtener rol:", roleError);
       setLoading(false);
       return;
     }
 
     // ✅ Redirigir según el rol
-    if (userData.rol === "admin") {
+    if (userData?.rol === "admin") {
       alert("Bienvenido administrador 👑");
       router.push("/admin");
     } else {
@@ -79,12 +71,10 @@ export default function LoginPage() {
   return (
     <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-[#f4ede4] to-[#e1c6b2] p-4">
       <div className="bg-white rounded-2xl shadow-xl w-full max-w-md p-8 space-y-6">
-        {/* 🔐 Título */}
         <h1 className="text-3xl font-bold text-[#b08968] text-center">
           🔒 Ingresar
         </h1>
 
-        {/* 📧 Campo de correo */}
         <input
           type="email"
           placeholder="Correo electrónico"
@@ -93,7 +83,6 @@ export default function LoginPage() {
           onChange={(e) => setEmail(e.target.value)}
         />
 
-        {/* 🔑 Campo de contraseña */}
         <input
           type="password"
           placeholder="Contraseña"
@@ -102,7 +91,6 @@ export default function LoginPage() {
           onChange={(e) => setPassword(e.target.value)}
         />
 
-        {/* 🧡 Botón principal */}
         <button
           onClick={handleLogin}
           disabled={loading}
@@ -113,7 +101,6 @@ export default function LoginPage() {
           {loading ? "Ingresando..." : "Iniciar Sesión"}
         </button>
 
-        {/* 🚀 Invitado */}
         <button
           onClick={handleGuest}
           className="w-full bg-[#cbb39a] hover:bg-[#b89d7f] text-white font-semibold py-3 rounded-lg transition"
@@ -121,7 +108,6 @@ export default function LoginPage() {
           Continuar como Invitado
         </button>
 
-        {/* 🔗 Registro */}
         <p className="text-center text-sm text-gray-600 mt-4">
           ¿No tienes cuenta?{" "}
           <span
