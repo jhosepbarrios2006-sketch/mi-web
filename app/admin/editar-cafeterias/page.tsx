@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabaseClient";
 import { useRouter } from "next/navigation";
 
-// 🧩 Definimos el tipo de dato Cafeteria
+// 🧩 Tipo de dato para cafeterías
 interface Cafeteria {
   id: string;
   nombre: string;
@@ -16,7 +16,7 @@ interface Cafeteria {
 export default function EditarCafeteriasPage() {
   const router = useRouter();
 
-  // 📦 Tipamos los estados
+  // 📦 Estados
   const [cafeterias, setCafeterias] = useState<Cafeteria[]>([]);
   const [editando, setEditando] = useState<string | null>(null);
   const [formData, setFormData] = useState<Omit<Cafeteria, "id">>({
@@ -27,25 +27,25 @@ export default function EditarCafeteriasPage() {
   });
   const [loading, setLoading] = useState(true);
 
-  // 🧠 Verificar que el usuario sea admin
+  // 🧠 Verificar que el usuario sea admin y cargar cafeterías
   useEffect(() => {
     const verificarRol = async () => {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
+      const { data: userData, error: authError } = await supabase.auth.getUser();
 
-      if (!user) {
+      if (authError || !userData?.user) {
         router.push("/login");
         return;
       }
 
-      const { data: userData } = await supabase
+      const user = userData.user;
+
+      const { data: rolData, error: rolError } = await supabase
         .from("usuarios")
         .select("rol")
         .eq("email", user.email)
         .maybeSingle();
 
-      if (userData?.rol !== "admin") {
+      if (rolError || rolData?.rol !== "admin") {
         alert("⚠️ No tienes permiso para acceder aquí");
         router.push("/");
         return;
@@ -58,7 +58,7 @@ export default function EditarCafeteriasPage() {
     verificarRol();
   }, [router]);
 
-  // 📦 Cargar cafeterías existentes
+  // 📦 Cargar cafeterías
   const cargarCafeterias = async () => {
     const { data, error } = await supabase
       .from("cafeterias")
@@ -102,18 +102,24 @@ export default function EditarCafeteriasPage() {
     }
   };
 
-  if (loading) return <p className="p-6 text-center">Cargando...</p>;
+  // 🌀 Pantalla de carga
+  if (loading) return <p className="p-6 text-center text-gray-600">Cargando...</p>;
 
+  // 🧱 Render principal
   return (
     <div className="p-6 max-w-4xl mx-auto space-y-6">
       <h1 className="text-3xl font-bold text-[#b08968] text-center">
         ☕ Editar Cafeterías
       </h1>
 
+      {cafeterias.length === 0 && (
+        <p className="text-center text-gray-500">No hay cafeterías registradas.</p>
+      )}
+
       {cafeterias.map((caf) => (
         <div
           key={caf.id}
-          className="bg-white p-4 shadow-md rounded-lg space-y-2"
+          className="bg-white p-4 shadow-md rounded-lg space-y-2 border border-gray-200"
         >
           {editando === caf.id ? (
             <>
@@ -171,8 +177,8 @@ export default function EditarCafeteriasPage() {
             <>
               <h2 className="font-bold text-xl">{caf.nombre}</h2>
               <p className="text-gray-600">{caf.descripcion}</p>
-              <p>📍 {caf.ubicacion}</p>
-              <p>🕒 {caf.horario}</p>
+              {caf.ubicacion && <p>📍 {caf.ubicacion}</p>}
+              {caf.horario && <p>🕒 {caf.horario}</p>}
               <button
                 onClick={() => editarCafeteria(caf)}
                 className="mt-2 bg-[#b08968] hover:bg-[#a06f4a] text-white px-3 py-1 rounded"
