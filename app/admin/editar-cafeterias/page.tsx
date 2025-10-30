@@ -15,28 +15,63 @@ interface Cafeteria {
 
 export default function EditarCafeteriasPage() {
   const [loading, setLoading] = useState(true);
+  const [verificando, setVerificando] = useState(true);
   const [cafes, setCafes] = useState<Cafeteria[]>([]);
   const [editando, setEditando] = useState<string | null>(null);
   const [formData, setFormData] = useState<Partial<Cafeteria>>({});
   const router = useRouter();
 
-  // Verificar sesión al cargar
+  // Verificar autenticación y rol
   useEffect(() => {
-    checkAuth();
+    checkAuthAndRole();
   }, []);
 
-  const checkAuth = async () => {
-    const {
-      data: { session },
-    } = await supabase.auth.getSession();
+  const checkAuthAndRole = async () => {
+    try {
+      // 1. Verificar sesión
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
 
-    if (!session) {
-      router.push("/login");
-      return;
+      if (!session) {
+        console.log("❌ No hay sesión");
+        router.replace("/login");
+        return;
+      }
+
+      console.log("✅ Sesión activa:", session.user.email);
+
+      // 2. Verificar rol
+      const { data: usuario, error } = await supabase
+        .from("usuarios")
+        .select("rol")
+        .eq("email", session.user.email)
+        .single();
+
+      console.log("👤 Usuario encontrado:", usuario);
+
+      if (error || !usuario) {
+        console.error("❌ Error al buscar usuario:", error);
+        alert("No tienes permisos para acceder a esta página");
+        router.replace("/");
+        return;
+      }
+
+      if (usuario.rol !== "admin") {
+        console.warn("⛔ No eres admin. Rol:", usuario.rol);
+        alert("Solo los administradores pueden acceder a esta página");
+        router.replace("/");
+        return;
+      }
+
+      console.log("✅ Acceso concedido: eres admin");
+      setVerificando(false);
+      await loadCafeterias();
+      setLoading(false);
+    } catch (err) {
+      console.error("❌ Error en verificación:", err);
+      router.replace("/login");
     }
-
-    await loadCafeterias();
-    setLoading(false);
   };
 
   // Cargar cafeterías
@@ -128,10 +163,16 @@ export default function EditarCafeteriasPage() {
     router.push("/");
   };
 
-  if (loading) {
+  // Mostrar pantalla de carga mientras verifica
+  if (verificando || loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <p className="text-xl">Cargando...</p>
+      <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-br from-amber-50 to-orange-100">
+        <div className="text-center">
+          <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-amber-900 mb-4"></div>
+          <p className="text-xl text-amber-900">
+            {verificando ? "Verificando permisos..." : "Cargando..."}
+          </p>
+        </div>
       </div>
     );
   }
