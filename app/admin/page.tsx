@@ -4,7 +4,6 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabaseClient";
 import { useRouter } from "next/navigation";
 
-// ✅ Tipos
 interface Cafe {
   id: string;
   nombre: string;
@@ -25,31 +24,17 @@ export default function AdminPage() {
   const [showModal, setShowModal] = useState(false);
   const router = useRouter();
 
-  // 🔐 Verificar usuario y rol
+  // 🔐 Solo verificar sesión (el middleware ya verificó el rol)
   useEffect(() => {
     async function loadData() {
-      const { data: userData, error: authError } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession();
 
-      if (authError || !userData?.user) {
+      if (!session?.user) {
         router.push("/login");
         return;
       }
 
-      const user = userData.user;
-      setUser({ email: user.email! });
-
-      // Verificar rol
-      const { data: perfil, error: rolError } = await supabase
-        .from("usuarios")
-        .select("rol")
-        .eq("email", user.email)
-        .single();
-
-      if (rolError || perfil?.rol !== "admin") {
-        router.push("/cafeterias");
-        return;
-      }
-
+      setUser({ email: session.user.email! });
       await fetchCafeterias();
       setLoading(false);
     }
@@ -104,7 +89,6 @@ export default function AdminPage() {
     router.push("/login");
   };
 
-  // ⏳ Cargando
   if (loading) return <p className="p-6 text-lg">Cargando panel...</p>;
 
   return (
@@ -151,7 +135,7 @@ export default function AdminPage() {
         ))}
       </div>
 
-      {/* 🪟 Modal de edición */}
+      {/* Modal de edición */}
       {showModal && (
         <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
           <div className="bg-white p-6 rounded-2xl shadow-lg w-full max-w-md space-y-4">

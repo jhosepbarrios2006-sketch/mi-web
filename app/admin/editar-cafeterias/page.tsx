@@ -14,48 +14,26 @@ interface Cafeteria {
 
 export default function EditarCafeteriasPage() {
   const [user, setUser] = useState<any>(null);
-  const [rol, setRol] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [cafes, setCafes] = useState<Cafeteria[]>([]);
   const router = useRouter();
 
-  // 🔑 Verificar usuario y rol
+  // 🔑 Solo verificar sesión (el middleware ya verificó el rol)
   useEffect(() => {
-    const fetchUserAndRole = async () => {
+    const checkSession = async () => {
       const { data: { session } } = await supabase.auth.getSession();
-      const currentUser = session?.user || null;
-      setUser(currentUser);
-
-      if (!currentUser) {
+      
+      if (!session) {
         router.push("/login");
         return;
       }
 
-      const { data: userData, error } = await supabase
-        .from("usuarios")
-        .select("rol")
-        .eq("email", currentUser.email)
-        .maybeSingle();
-
-      if (error || !userData) {
-        console.error("❌ Error obteniendo rol del usuario:", error);
-        router.push("/login");
-        return;
-      }
-
-      setRol(userData.rol);
-
-      if (userData.rol !== "admin") {
-        console.warn("🚫 Usuario no autorizado. Redirigiendo...");
-        router.push("/cafeterias");
-        return;
-      }
-
+      setUser(session.user);
       await fetchCafeterias();
       setLoading(false);
     };
 
-    fetchUserAndRole();
+    checkSession();
   }, [router]);
 
   // ☕ Obtener cafeterías
